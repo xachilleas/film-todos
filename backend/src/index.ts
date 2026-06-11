@@ -4,6 +4,8 @@ import { connectDB } from "./utils/db";
 import dotenv from 'dotenv';
 import authRoutes from './routes/authRoutes';
 import { authMiddleware } from './middleware/auth';
+import moviesRoutes from './routes/moviesRoutes';
+
 
 
 dotenv.config();
@@ -12,7 +14,7 @@ const app = express();
 const PORT = 3000;
 
 app.use(cors());
-app.use(express.json()); // Important: This parses JSON request bodies
+app.use(express.json());
 
 
 // Test database connection when server starts
@@ -40,6 +42,7 @@ app.get("/api/test-db", async (req, res) => {
 });
 
 app.use('/api/auth', authRoutes);
+app.use('/api/movies', moviesRoutes);
 
 app.get('/api/health', (req, res) => {
     res.json({ status: 'OK', message: 'Server is running' });
