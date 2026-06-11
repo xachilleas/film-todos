@@ -41,7 +41,7 @@ export class OMDbService {
     const response = await axios.get(this.baseUrl, {
         params: {
             apiKey: this.apiKey,
-            arguments: searchTerm,
+            s: searchTerm,
             type: 'movie',
             page: page
         }
