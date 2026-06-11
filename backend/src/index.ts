@@ -2,7 +2,9 @@ import express from "express";
 import cors from "cors";
 import { connectDB } from "./utils/db";
 import dotenv from 'dotenv';
-import authRoutes from './routes/authRoutes';   // ← ADD THIS
+import authRoutes from './routes/authRoutes';
+import { authMiddleware } from './middleware/auth';
+
 
 dotenv.config();
 
@@ -37,13 +39,17 @@ app.get("/api/test-db", async (req, res) => {
     }
 });
 
-app.use(cors());
-app.use(express.json());
-
 app.use('/api/auth', authRoutes);
 
 app.get('/api/health', (req, res) => {
     res.json({ status: 'OK', message: 'Server is running' });
+});
+
+app.get('/api/protected-test', authMiddleware, (req, res) => {
+    res.json({
+        message: 'You are authenticated!',
+        userId: req.userId
+    });
 });
 
 app.listen(PORT, () => {
