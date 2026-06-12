@@ -7,8 +7,9 @@ export class WatchlistService {
         private watchlistRepository: WatchlistRepository
     ) {}
 
-    async getUserWatchlist (userId: number) {
-        return await this.watchlistRepository.findByUserId(userId);
+    async getUserWatchlist (userId: number, page: number =1, limit: number = 10) {
+        const offset = (page -1) * limit;
+        return await this.watchlistRepository.findByUserId(userId, limit, offset);
     }
 
     async removeFromWatchlist (userId: number, imdbId: string) {
@@ -34,4 +35,8 @@ export class WatchlistService {
         return await this.watchlistRepository.save(movieToSave);
         }
     }
+
+const omdbService = new OMDbService();
+const watchlistRepository = new WatchlistRepository();
+export const watchlistService = new WatchlistService(omdbService, watchlistRepository);
 
