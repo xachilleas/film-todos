@@ -5,6 +5,10 @@ import dotenv from 'dotenv';
 import authRoutes from './routes/authRoutes';
 import { authMiddleware } from './middleware/auth';
 import moviesRoutes from './routes/moviesRoutes';
+import watchlistRoutes from './routes/watchlistRoutes';
+import swaggerUi from 'swagger-ui-express';
+import { specs } from './swagger';
+import errorHandler from './middleware/errorHandler';
 
 
 
@@ -15,7 +19,7 @@ const PORT = 3000;
 
 app.use(cors());
 app.use(express.json());
-
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 
 // Test database connection when server starts
 connectDB().catch(error => {
@@ -34,7 +38,7 @@ app.get("/api/ping", (req, res) => {
 // Test database route (temporary - will be removed later)
 app.get("/api/test-db", async (req, res) => {
     try {
-        const result = await connectDB();
+        await connectDB();  // Just call it, don't store result
         res.json({ message: "Database connected successfully", timestamp: new Date() });
     } catch (error) {
         res.status(500).json({ error: "Database connection failed" });
@@ -43,6 +47,7 @@ app.get("/api/test-db", async (req, res) => {
 
 app.use('/api/auth', authRoutes);
 app.use('/api/movies', moviesRoutes);
+app.use('/api/watchlist', watchlistRoutes);
 
 app.get('/api/health', (req, res) => {
     res.json({ status: 'OK', message: 'Server is running' });
@@ -54,6 +59,14 @@ app.get('/api/protected-test', authMiddleware, (req, res) => {
         userId: req.userId
     });
 });
+
+// 404 handler - LAST before error handler
+app.use((req, res) => {
+    res.status(404).json({ message: 'Route not found' });
+});
+
+
+app.use(errorHandler);
 
 app.listen(PORT, () => {
     console.log(`Server running on http://localhost:${PORT}`);
