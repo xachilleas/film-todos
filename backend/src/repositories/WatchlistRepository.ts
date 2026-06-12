@@ -39,13 +39,21 @@ export class WatchlistRepository {
         return result.recordset[0];
     }
 
-    // Get all watchlist items for a user
-    async findByUserId(userId: number): Promise<WatchlistItem[]> {
+    // Get all watchlist items for a user (with pagination)
+    async findByUserId(userId: number, limit?: number, offset?: number): Promise<WatchlistItem[]> {
         const pool = getPool();
-        const result = await pool.request()
-            .input('user_id', userId)
-            .query('SELECT * FROM WatchlistItems WHERE user_id = @user_id ORDER BY added_at DESC');
 
+        let query = 'SELECT * FROM WatchlistItems WHERE user_id = @user_id ORDER BY added_at DESC';
+        const request = pool.request().input('user_id', userId);
+
+        // Add pagination if limit and offset are provided
+        if (limit !== undefined && offset !== undefined) {
+            query += ' OFFSET @offset ROWS FETCH NEXT @limit ROWS ONLY';
+            request.input('offset', offset);
+            request.input('limit', limit);
+        }
+
+        const result = await request.query(query);
         return result.recordset;
     }
 
