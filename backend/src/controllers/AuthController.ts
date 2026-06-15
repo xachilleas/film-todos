@@ -31,15 +31,18 @@ export class AuthController {
                 { expiresIn: '7d'}
             );
 
-            res.status(201).json({
-                message: "User registered successfully",
+        res.status(201).json({
+            status: "success",
+            message: "User registered successfully",
+            data: {
                 token: token,
                 user: {
                     id: newUser.id,
                     username: newUser.username,
                     email: newUser.email
                 }
-            });
+            }
+        });
         }
 
         login = async (req: Request, res: Response): Promise<void> => {
@@ -64,14 +67,17 @@ export class AuthController {
             {expiresIn: '7d' }
         );
 
-        res.status(200).json({
-            message: "Login successful",
-            token: token,
-            user: {
-                id: user.id,
-                username: user.username,
-                email: user.email
-            }
-        });
+            res.status(200).json({
+                status: "success",
+                message: "Login successful",
+                data: {
+                    token: token,
+                    user: {
+                        id: user.id,
+                        username: user.username,
+                        email: user.email
+                    }
+                }
+            });
         }
     }

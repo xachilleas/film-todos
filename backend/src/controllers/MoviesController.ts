@@ -15,8 +15,20 @@ export class MoviesController {
             return;
         }
         try {
-            const results = await this.omdbService.searchMovies(q, parseInt(page as string));
-            res.json(results);
+            const pageNum = parseInt(page as string);
+            const results = await this.omdbService.searchMovies(q, pageNum);
+
+            res.json({
+                status: "success",
+                data: results.Search || [],
+                pagination: {
+                    currentPage: pageNum,
+                    limit: 10,
+                    nextPage: results.Search && results.Search.length === 10 ? pageNum + 1 : null,
+                    prevPage: pageNum > 1 ? pageNum - 1 : null
+                }
+            });
+
         } catch (error) {
             console.error('OMDb search error:', error);
             res.status(500).json({message: 'Failed to search movies'});
@@ -39,7 +51,11 @@ export class MoviesController {
                 return;
             }
 
-            res.json(movie);
+            res.json({
+                status: "success",
+                data: movie
+            });
+
         } catch (error) {
             console.error('OMDb fetch error:', error);
             res.status(500).json({ message: 'Failed to fetch movie details' });
