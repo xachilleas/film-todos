@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
 const Login: React.FC = () => {
@@ -6,14 +7,18 @@ const Login: React.FC = () => {
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
     const { login } = useAuth();
+    const navigate = useNavigate();
+    const location = useLocation();
+
+    // Get the page they came from (default to home)
+    const from = location.state?.from || '/';
 
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
         setError('');
         try {
             await login(email, password);
-            alert('Login successful!');
-            // Will redirect later
+            navigate(from);  // Redirect back to where they came from
         } catch (err: any) {
             setError(err.response?.data?.message || 'Login failed');
         }
