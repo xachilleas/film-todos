@@ -49,12 +49,22 @@ export type MovieDetailsResponse = ApiResponse<MovieDetails>;
 export interface WatchlistItem {
     id: number;
     userId: number;
-    imdbID: string;
+    imdb_id: string;
     title: string;
     year: string;
     poster: string;
     addedAt: string;
     watched: boolean;
+}
+
+export interface WatchlistResponse {
+    data: WatchlistItem[];
+    pagination: {
+        currentPage: number;
+        limit: number;
+        nextPage: number | null;
+        prevPage: number | null;
+    };
 }
 
 export type WatchlistGetResponse = ApiResponse<WatchlistItem[]>;
