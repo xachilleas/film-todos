@@ -9,14 +9,14 @@ export class MoviesController {
     }
 
     searchMovies = async (req: Request, res: Response): Promise<void> => {
-        const {q, page = '1'} = req.query;
-        if (!q || typeof q !== 'string') {
-            res.status(400).json({message: 'Search query parameter "q" is required'});
+        const {title, page = '1'} = req.query;
+        if (!title || typeof title !== 'string') {
+            res.status(400).json({message: 'Search query parameter "title" is required'});
             return;
         }
         try {
             const pageNum = parseInt(page as string);
-            const results = await this.omdbService.searchMovies(q, pageNum);
+            const results = await this.omdbService.searchMovies(title, pageNum);
 
             res.json({
                 status: "success",
