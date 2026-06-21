@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react';
-import { useParams, Link } from 'react-router-dom';
+import { useParams, Link, useLocation } from 'react-router-dom';
 import { movieService } from '../services/movieService';
 import type { MovieDetail } from '../services/movieService';
 import { watchlistService } from '../services/watchlistService';
@@ -10,11 +10,14 @@ const MovieDetails = () => {
     const { id } = useParams<{ id: string }>();
     const { user } = useAuth();
     const navigate = useNavigate();
+    const location = useLocation();
     const [isAdding, setIsAdding] = useState(false);
     const [addedToWatchlist, setAddedToWatchlist] = useState(false);
     const [movie, setMovie] = useState<MovieDetail | null>(null);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState('');
+    const [imageFailed, setImageFailed] = useState(false);
+
 
     useEffect(() => {
         const fetchMovieDetails = async () => {
@@ -22,14 +25,16 @@ const MovieDetails = () => {
 
             setLoading(true);
             setError('');
+            setImageFailed(false);
+
 
             try {
                 const data = await movieService.getMovieDetails(id);
-                console.log('🎬 Full movie data:', data);  // <-- ADD THIS
-                console.log('📝 Keys in movie object:', Object.keys(data));  // <-- ADD THIS
+                console.log('🎬 Full movie data:', data);
+                console.log('📝 Keys in movie object:', Object.keys(data));
                 setMovie(data);
             } catch (err: any) {
-                console.error('❌ Error fetching movie:', err);  // <-- ADD THIS
+                console.error('❌ Error fetching movie:', err);
                 setError(err.response?.data?.message || 'Failed to load movie details');
             } finally {
                 setLoading(false);
@@ -40,7 +45,6 @@ const MovieDetails = () => {
     }, [id]);
 
     const handleAddToWatchlist = async () => {
-        // Check if user is authenticated
         if (!user) {
             navigate('/login', { state: { from: `/movie/${id}` } });
             return;
@@ -66,21 +70,78 @@ const MovieDetails = () => {
     if (error) return <div style={{ padding: '20px', color: 'red' }}>{error}</div>;
     if (!movie) return <div style={{ padding: '20px' }}>Movie not found</div>;
 
+    const showPlaceholder = !movie.Poster ||
+        movie.Poster === 'N/A' ||
+        movie.Poster === '' ||
+        imageFailed;
+
     return (
         <div style={{ padding: '20px', maxWidth: '1000px', margin: '0 auto' }}>
-            <Link to="/" style={{ textDecoration: 'none', color: '#007bff' }}>
-                ← Back to Search
+            <Link
+                to={location.state?.fromSearch ? `/?search=${encodeURIComponent(location.state.fromSearch)}` : '/'}
+                style={{ textDecoration: 'none', color: '#007bff' }}
+            >
+                ← Back to Search Results
             </Link>
 
             <div style={{ display: 'flex', gap: '40px', marginTop: '20px' }}>
+                {/* Poster Column */}
                 <div style={{ flex: '0 0 300px' }}>
-                    <img
-                        src={movie.Poster !== 'N/A' ? movie.Poster : 'https://via.placeholder.com/300x450?text=No+Poster'}
-                        alt={movie.Title}
-                        style={{ width: '100%', borderRadius: '8px' }}
-                    />
+                    <div style={{
+                        width: '100%',
+                        height: '450px',
+                        flexShrink: 0,
+                        backgroundColor: '#f5f5f5',
+                        overflow: 'hidden',
+                        borderRadius: '8px',
+                    }}>
+                        {!showPlaceholder ? (
+                            <img
+                                src={movie.Poster}
+                                alt={movie.Title}
+                                style={{
+                                    width: '100%',
+                                    height: '100%',
+                                    objectFit: 'cover',
+                                    display: 'block',
+                                    borderRadius: '8px',
+                                }}
+                                onError={() => setImageFailed(true)}
+                            />
+                        ) : (
+                            <div style={{
+                                width: '100%',
+                                height: '100%',
+                                backgroundColor: '#f5f5f5',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center',
+                                borderRadius: '8px',
+                            }}>
+                                <svg
+                                    width="80"
+                                    height="80"
+                                    viewBox="0 0 24 24"
+                                    fill="none"
+                                    stroke="#ccc"
+                                    strokeWidth="1.5"
+                                    strokeLinecap="round"
+                                    strokeLinejoin="round"
+                                >
+                                    <rect x="2" y="4" width="20" height="16" rx="2" />
+                                    <rect x="6" y="7" width="3" height="2" />
+                                    <rect x="6" y="11" width="3" height="2" />
+                                    <rect x="6" y="15" width="3" height="2" />
+                                    <rect x="15" y="7" width="3" height="2" />
+                                    <rect x="15" y="11" width="3" height="2" />
+                                    <rect x="15" y="15" width="3" height="2" />
+                                </svg>
+                            </div>
+                        )}
+                    </div>
                 </div>
 
+                {/* Details Column */}
                 <div style={{ flex: 1 }}>
                     <h1>{movie.Title}</h1>
                     <p><strong>Year:</strong> {movie.Year}</p>
