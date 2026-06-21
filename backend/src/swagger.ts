@@ -29,7 +29,12 @@ const options = {
             },
         ],
     },
-    apis: ['./src/routes/*.ts'],
+    // Explicitly list the route files
+    apis: [
+        './src/routes/authRoutes.ts',
+        './src/routes/moviesRoutes.ts',
+        './src/routes/watchlistRoutes.ts'
+    ],
 };
 
 export const specs = swaggerJsdoc(options);
