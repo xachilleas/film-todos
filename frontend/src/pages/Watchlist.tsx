@@ -3,20 +3,23 @@ import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { watchlistService } from '../services/watchlistService';
 import type { WatchlistItem } from '../types';
+import Toast from "../components/Toast.tsx";
 
 const Watchlist = () => {
-    // State
     const [watchlist, setWatchlist] = useState<WatchlistItem[]>([]);
     const [loading, setLoading] = useState(true);
     const [error, setError] = useState<string | null>(null);
     const [currentPage, setCurrentPage] = useState(1);
     const [nextPage, setNextPage] = useState<number | null>(null);
     const [prevPage, setPrevPage] = useState<number | null>(null);
-    const [removingId, setRemovingId] = useState<number | null>(null);
+    const [removingId, setRemovingId] = useState<string | null>(null);
+    const [totalMovies, setTotalMovies] = useState<number>(0);
+    const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
+
+
 
     const { user } = useAuth();
 
-    // Fetch watchlist
     const fetchWatchlist = async (page: number = 1) => {
         try {
             setLoading(true);
@@ -28,6 +31,8 @@ const Watchlist = () => {
             setCurrentPage(response.pagination.currentPage);
             setNextPage(response.pagination.nextPage);
             setPrevPage(response.pagination.prevPage);
+            setTotalMovies(response.pagination.total);
+
         } catch (err) {
             setError('Failed to load your watchlist. Please try again.');
             console.error('Error fetching watchlist:', err);
@@ -36,18 +41,25 @@ const Watchlist = () => {
         }
     };
 
-    // Remove from watchlist
-    const handleRemove = async (id: number) => {
+    const handleRemove = async (imdbId: string) => {
         if (!window.confirm('Remove this movie from your watchlist?')) {
             return;
         }
 
         try {
-            setRemovingId(id);
-            await watchlistService.removeFromWatchlist(id);
+            setRemovingId(imdbId);
+            await watchlistService.removeFromWatchlist(imdbId);
 
-            // Refresh the list (stay on same page)
+            setToast({ message: 'Movie removed from watchlist!', type: 'success' });
+
+            // Refresh the current page
             await fetchWatchlist(currentPage);
+
+            // If the current page is now empty and we're not on page 1, go to previous page
+            const freshResponse = await watchlistService.getWatchlist(currentPage);
+            if (freshResponse.data.length === 0 && currentPage > 1) {
+                setCurrentPage(currentPage - 1);
+            }
         } catch (err) {
             alert('Failed to remove movie. Please try again.');
             console.error('Error removing movie:', err);
@@ -56,12 +68,10 @@ const Watchlist = () => {
         }
     };
 
-    // Fetch on mount and when page changes
     useEffect(() => {
         fetchWatchlist(currentPage);
     }, [currentPage]);
 
-    // Loading state (first load)
     if (loading && watchlist.length === 0) {
         return (
             <div className="loading-container">
@@ -70,7 +80,6 @@ const Watchlist = () => {
         );
     }
 
-    // Error state
     if (error) {
         return (
             <div className="error-container">
@@ -80,7 +89,6 @@ const Watchlist = () => {
         );
     }
 
-    // Empty state
     if (watchlist.length === 0) {
         return (
             <div className="empty-container">
@@ -93,16 +101,14 @@ const Watchlist = () => {
         );
     }
 
-    // Main render
     return (
         <div className="watchlist-container">
-            <h1>My Watchlist ({watchlist.length} movies)</h1>
+            <h1>My Watchlist ({totalMovies} movies)</h1>
             {user && <p>Welcome, {user.username || user.email}!</p>}
 
             <div className="watchlist">
                 {watchlist.map((item) => (
                     <div key={item.id} className="watchlist-row">
-                        {/* Poster Thumbnail */}
                         <div className="watchlist-poster">
                             <img
                                 src={item.poster !== 'N/A' ? item.poster : '/placeholder.png'}
@@ -113,27 +119,28 @@ const Watchlist = () => {
                             />
                         </div>
 
-                        {/* Movie Info */}
                         <div className="watchlist-info">
-                            <Link to={`/movie/${item.imdb_id}`} className="movie-title">
+                            <Link
+                                to={`/movie/${item.imdb_id}`}
+                                state={{ fromWatchlist: true }}
+                                className="movie-title"
+                            >
                                 {item.title}
                             </Link>
                             <span className="movie-year">{item.year}</span>
                         </div>
 
-                        {/* Remove Button */}
                         <button
-                            onClick={() => handleRemove(item.id)}
-                            disabled={removingId === item.id}
+                            onClick={() => handleRemove(item.imdb_id)}
+                            disabled={removingId === item.imdb_id}
                             className="remove-button"
                         >
-                            {removingId === item.id ? 'Removing...' : '✕ Remove'}
+                            {removingId === item.imdb_id ? 'Removing...' : '✕ Remove'}
                         </button>
                     </div>
                 ))}
             </div>
 
-            {/* Pagination */}
             <div className="pagination">
                 <button
                     onClick={() => setCurrentPage(prev => prev - 1)}
@@ -144,8 +151,8 @@ const Watchlist = () => {
                 </button>
 
                 <span className="page-info">
-          Page {currentPage}
-        </span>
+                    Page {currentPage}
+                </span>
 
                 <button
                     onClick={() => setCurrentPage(prev => prev + 1)}
@@ -155,6 +162,14 @@ const Watchlist = () => {
                     Next →
                 </button>
             </div>
+            {toast && (
+                <Toast
+                    message={toast.message}
+                    type={toast.type}
+                    duration={1500}
+                    onClose={() => setToast(null)}
+                />
+            )}
         </div>
     );
 };

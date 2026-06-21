@@ -18,13 +18,26 @@ class WatchlistController {
                 throw new AppError('imdbId is required', 400);
             }
 
-            const watchlistItem = await watchlistService.addToWatchlist(userId, imdbId);
+            try {
+                const watchlistItem = await watchlistService.addToWatchlist(userId, imdbId);
 
-            res.status(201).json({
-                status: 'success',
-                message: 'Movie added to watchlist',
-                data: watchlistItem
-            });
+                res.status(201).json({
+                    status: 'success',
+                    message: 'Movie added to watchlist',
+                    data: watchlistItem
+                });
+            } catch (error: any) {
+                // Check if error is "already in watchlist"
+                if (error.message === 'Movie already in watchlist') {
+                    res.status(409).json({
+                        status: 'error',
+                        message: 'Movie already in your watchlist'
+                    });
+                    return;
+                }
+                // Re-throw other errors
+                throw error;
+            }
         } catch (error) {
             next(error);
         }
@@ -49,23 +62,13 @@ class WatchlistController {
                 throw new AppError('Limit must be between 1 and 100', 400);
             }
 
-            // Call service with pagination parameters
-            const watchlist = await watchlistService.getUserWatchlist(userId, page, limit);
-
-            // Calculate next/previous page info
-            const hasMore = watchlist.length === limit;
-            const nextPage = hasMore ? page + 1 : null;
-            const prevPage = page > 1 ? page - 1 : null;
+            // Call service with pagination parameters - now returns { data, pagination }
+            const result = await watchlistService.getUserWatchlist(userId, page, limit);
 
             res.status(200).json({
                 status: 'success',
-                data: watchlist,
-                pagination: {
-                    currentPage: page,
-                    limit: limit,
-                    nextPage: nextPage,
-                    prevPage: prevPage
-                }
+                data: result.data,
+                pagination: result.pagination
             });
         } catch (error) {
             next(error);

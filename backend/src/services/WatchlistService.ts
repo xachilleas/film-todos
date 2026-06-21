@@ -9,9 +9,26 @@ export class WatchlistService {
 
     async getUserWatchlist (userId: number, page: number =1, limit: number = 10) {
         const offset = (page -1) * limit;
-        return await this.watchlistRepository.findByUserId(userId, limit, offset);
-    }
+        const result = await this.watchlistRepository.findByUserId(userId, limit, offset);
 
+        // Calculate pagination
+        const total = result.total;
+        const totalPages = Math.ceil(total / limit);
+        const hasNextPage = page < totalPages;
+        const hasPrevPage = page > 1;
+
+        return {
+            data: result.items,
+            pagination: {
+                currentPage: page,
+                limit: limit,
+                total: total,
+                totalPages: totalPages,
+                nextPage: hasNextPage ? page + 1 : null,
+                prevPage: hasPrevPage ? page - 1 : null
+            }
+        };
+    }
     async removeFromWatchlist (userId: number, imdbId: string) {
         return await this.watchlistRepository.delete(userId, imdbId);
     }

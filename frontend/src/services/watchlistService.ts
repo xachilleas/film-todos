@@ -19,8 +19,8 @@ export const watchlistService = {
     },
 
     // Remove from watchlist
-    removeFromWatchlist: async (id: number): Promise<{ message: string }> => {
-        const response = await api.delete(`/watchlist/${id}`);
+    removeFromWatchlist: async (imdbId: string): Promise<{ message: string }> => {
+        const response = await api.delete(`/watchlist/${imdbId}`);
         return response.data;
     }
 };

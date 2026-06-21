@@ -40,9 +40,17 @@ export class WatchlistRepository {
     }
 
     // Get all watchlist items for a user (with pagination)
-    async findByUserId(userId: number, limit?: number, offset?: number): Promise<WatchlistItem[]> {
+    async findByUserId(userId: number, limit?: number, offset?: number): Promise<{ items: WatchlistItem[]; total: number }> {
         const pool = getPool();
 
+        // First, get the total count of items for this user
+        const countResult = await pool.request()
+            .input('user_id', userId)
+            .query('SELECT COUNT(*) as total FROM WatchlistItems WHERE user_id = @user_id');
+
+        const total = countResult.recordset[0].total;
+
+        // Then, get the paginated items
         let query = 'SELECT * FROM WatchlistItems WHERE user_id = @user_id ORDER BY added_at DESC';
         const request = pool.request().input('user_id', userId);
 
@@ -54,7 +62,11 @@ export class WatchlistRepository {
         }
 
         const result = await request.query(query);
-        return result.recordset;
+
+        return {
+            items: result.recordset,
+            total: total
+        };
     }
 
     // Delete a movie from user's watchlist

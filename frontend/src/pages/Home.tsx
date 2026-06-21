@@ -40,7 +40,20 @@ const Home = () => {
         }
     };
 
+    // --- UPDATED useEffect to handle clear signal ---
     useEffect(() => {
+        // Check if we came from Navbar with clear flag
+        if (location.state?.clearSearch) {
+            setSearchTerm('');
+            setMovies([]);
+            setError('');
+            setFailedImages(new Set());
+            // Clear the state so it doesn't trigger again
+            navigate('/', { replace: true, state: {} });
+            return;
+        }
+
+        // Existing code for reading search from URL
         const params = new URLSearchParams(location.search);
         const searchQuery = params.get('search');
 
@@ -48,7 +61,7 @@ const Home = () => {
             setSearchTerm(searchQuery);
             performSearch(searchQuery);
         }
-    }, [location.search]);
+    }, [location.search, location.state]);
 
     const handleSearch = async () => {
         if (!searchTerm.trim()) {
@@ -59,8 +72,6 @@ const Home = () => {
         navigate(`/?search=${encodeURIComponent(searchTerm.trim())}`, { replace: true });
         await performSearch(searchTerm.trim());
     };
-
-
 
     return (
         <div style={{ padding: '20px', maxWidth: '800px', margin: '0 auto' }}>
@@ -130,7 +141,6 @@ const Home = () => {
                                 onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
                                 onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
                             >
-                                {/* Poster Image or Placeholder - ALWAYS takes the same space */}
                                 <div style={{
                                     width: '100%',
                                     height: '300px',
@@ -183,7 +193,6 @@ const Home = () => {
                                     )}
                                 </div>
 
-                                {/* Title and Year - Always at the bottom */}
                                 <div style={{
                                     padding: '10px',
                                     flex: 1,

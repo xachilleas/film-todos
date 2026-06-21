@@ -8,28 +8,61 @@ const Navbar = () => {
     const navigate = useNavigate();
 
     const handleLogout = () => {
-        logout();  // Clear auth state
-        // Navigate after state clears
+        logout();
         setTimeout(() => {
             navigate('/');
         }, 0);
     };
 
+    // --- NEW: Handle going to Home with clear state ---
+    const goToHome = () => {
+        navigate('/', {
+            state: { clearSearch: true }  // ← Tell Home to clear everything
+        });
+    };
+
     return (
         <nav className="navbar">
             <div className="navbar-container">
-                {/* Logo/Brand */}
-                <Link to="/" className="navbar-brand">
+                {/* Logo/Brand - now uses goToHome */}
+                <button
+                    onClick={goToHome}
+                    className="navbar-brand-button"
+                    style={{
+                        background: 'none',
+                        border: 'none',
+                        cursor: 'pointer',
+                        fontSize: 'inherit',
+                        fontWeight: 'bold',
+                        color: 'inherit',
+                        padding: 0,
+                    }}
+                >
                     🎬 Film-Todos
-                </Link>
+                </button>
 
                 {/* Navigation Links */}
                 <div className="navbar-links">
-                    {/* Search link - always visible */}
-                    <Link to="/" className="nav-link">Search</Link>
+                    {/* Search link - now uses goToHome */}
+                    <button
+                        onClick={goToHome}
+                        className="nav-link-button"
+                        style={{
+                            background: 'none',
+                            border: 'none',
+                            cursor: 'pointer',
+                            fontSize: '16px',
+                            color: '#007bff',
+                            padding: '8px 12px',
+                            borderRadius: '4px',
+                        }}
+                        onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e9ecef'}
+                        onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
+                    >
+                        Search
+                    </button>
 
                     {user ? (
-                        // Logged in - show watchlist, user info, and logout
                         <>
                             <Link to="/watchlist" className="nav-link">My Watchlist</Link>
                             <span className="navbar-user">👋 {user.username || user.email}</span>
@@ -38,7 +71,6 @@ const Navbar = () => {
                             </button>
                         </>
                     ) : (
-                        // Not logged in - show login link
                         <Link to="/login" className="nav-link">Login</Link>
                     )}
                 </div>
