@@ -111,14 +111,14 @@ const MovieDetails = () => {
                     to="/watchlist"
                     style={{ textDecoration: 'none', color: '#007bff' }}
                 >
-                    ← Back to Watchlist
+                    ← back to watchlist
                 </Link>
             ) : (
                 <Link
                     to={location.state?.fromSearch ? `/?search=${encodeURIComponent(location.state.fromSearch)}` : '/'}
-                    style={{ textDecoration: 'none', color: '#007bff' }}
+                    style={{ textDecoration: 'none', color: '#008080' }}
                 >
-                    ← Back to Search Results
+                    ← back to search results
                 </Link>
             )}
 
@@ -217,7 +217,7 @@ const MovieDetails = () => {
                                     <button
                                         style={{
                                             padding: '12px 24px',
-                                            backgroundColor: '#6c757d',
+                                            backgroundColor: '#008080',
                                             color: 'white',
                                             border: 'none',
                                             borderRadius: '4px',
@@ -225,7 +225,7 @@ const MovieDetails = () => {
                                             cursor: 'pointer',
                                         }}
                                     >
-                                        ← Back to Watchlist
+                                        ← back to watchlist
                                     </button>
                                 </Link>
                             </>
@@ -237,7 +237,7 @@ const MovieDetails = () => {
                                     disabled={isAdding || addedToWatchlist}
                                     style={{
                                         padding: '12px 24px',
-                                        backgroundColor: addedToWatchlist ? '#6c757d' : '#28a745',
+                                        backgroundColor: addedToWatchlist ? '#6c757d' : '#008080',
                                         color: 'white',
                                         border: 'none',
                                         borderRadius: '4px',
@@ -245,7 +245,7 @@ const MovieDetails = () => {
                                         cursor: addedToWatchlist ? 'default' : 'pointer',
                                     }}
                                 >
-                                    {isAdding ? 'Adding...' : addedToWatchlist ? '✅ In Watchlist' : 'Add to Watchlist'}
+                                    {isAdding ? 'Adding...' : addedToWatchlist ? '✅ In Watchlist' : 'add to watchlist'}
                                 </button>
                                 <Link
                                     to={location.state?.fromSearch ? `/?search=${encodeURIComponent(location.state.fromSearch)}` : '/'}
@@ -254,7 +254,7 @@ const MovieDetails = () => {
                                     <button
                                         style={{
                                             padding: '12px 24px',
-                                            backgroundColor: '#6c757d',
+                                            backgroundColor: '#008080',
                                             color: 'white',
                                             border: 'none',
                                             borderRadius: '4px',
@@ -262,7 +262,7 @@ const MovieDetails = () => {
                                             cursor: 'pointer',
                                         }}
                                     >
-                                        ← Back to Search
+                                        ← back to search
                                     </button>
                                 </Link>
                             </>

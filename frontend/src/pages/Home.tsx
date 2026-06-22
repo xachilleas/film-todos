@@ -40,20 +40,16 @@ const Home = () => {
         }
     };
 
-    // --- UPDATED useEffect to handle clear signal ---
     useEffect(() => {
-        // Check if we came from Navbar with clear flag
         if (location.state?.clearSearch) {
             setSearchTerm('');
             setMovies([]);
             setError('');
             setFailedImages(new Set());
-            // Clear the state so it doesn't trigger again
             navigate('/', { replace: true, state: {} });
             return;
         }
 
-        // Existing code for reading search from URL
         const params = new URLSearchParams(location.search);
         const searchQuery = params.get('search');
 
@@ -74,11 +70,29 @@ const Home = () => {
     };
 
     return (
-        <div style={{ padding: '20px', maxWidth: '800px', margin: '0 auto' }}>
-            <h1>🎬 Search Movies</h1>
+        <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
+            minHeight: 'calc(100vh - 180px)',
+            padding: '20px',
+            maxWidth: '800px',
+            margin: '0 auto',
+            width: '100%'
+        }}>
+            <h2 style={{ fontSize: '20px', fontWeight: '400', color: '#666', marginBottom: '10px' }}>
+                Search Movies
+            </h2>
             {user && <p>Welcome, {user.username}!</p>}
 
-            <div style={{ display: 'flex', gap: '10px', marginBottom: '20px' }}>
+            <div style={{
+                display: 'flex',
+                gap: '10px',
+                marginBottom: '20px',
+                width: '100%',
+                maxWidth: '600px'
+            }}>
                 <input
                     type="text"
                     placeholder="Search for a movie..."
@@ -90,7 +104,8 @@ const Home = () => {
                         padding: '10px',
                         fontSize: '16px',
                         border: '1px solid #ccc',
-                        borderRadius: '4px'
+                        borderRadius: '4px',
+                        fontFamily: 'Kreon, serif'
                     }}
                 />
                 <button
@@ -99,11 +114,12 @@ const Home = () => {
                     style={{
                         padding: '10px 20px',
                         fontSize: '16px',
-                        backgroundColor: '#007bff',
+                        backgroundColor: '#008080',
                         color: 'white',
                         border: 'none',
                         borderRadius: '4px',
-                        cursor: 'pointer'
+                        cursor: 'pointer',
+                        fontFamily: 'Kreon, serif'
                     }}
                 >
                     {loading ? 'Searching...' : 'Search'}
@@ -112,7 +128,13 @@ const Home = () => {
 
             {error && <p style={{ color: 'red', marginBottom: '10px' }}>{error}</p>}
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: '20px' }}>
+            <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
+                gap: '20px',
+                width: '100%',
+                maxWidth: '1200px'
+            }}>
                 {movies.map((movie) => {
                     const showPlaceholder = !movie.Poster ||
                         movie.Poster === 'N/A' ||

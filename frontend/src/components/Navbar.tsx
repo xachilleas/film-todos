@@ -23,23 +23,36 @@ const Navbar = () => {
 
     return (
         <nav className="navbar">
-            <div className="navbar-container">
+            <div className="nav-container-main">
                 {/* Logo/Brand - now uses goToHome */}
-                <button
-                    onClick={goToHome}
-                    className="navbar-brand-button"
-                    style={{
-                        background: 'none',
-                        border: 'none',
-                        cursor: 'pointer',
-                        fontSize: 'inherit',
-                        fontWeight: 'bold',
-                        color: 'inherit',
-                        padding: 0,
-                    }}
-                >
-                    🎬 Film-Todos
-                </button>
+                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                    <button
+                        onClick={goToHome}
+                        className="navbar-brand-button"
+                        style={{
+                            background: 'none',
+                            border: 'none',
+                            cursor: 'pointer',
+                            fontSize: '40px',
+                            fontWeight: 'bold',
+                            color: '#000000',
+                            padding: 0,
+                            fontFamily: 'Kreon, serif',
+                            lineHeight: 1.1
+                        }}
+                    >
+                        film-todos
+                    </button>
+                    <span style={{
+                        fontSize: '15px',
+                        color: '#999',
+                        fontFamily: 'Kreon, serif',
+                        letterSpacing: '0.3px',
+                        marginTop: '2px'
+                    }}>
+        movie search engine &amp; personal watchlist service
+    </span>
+                </div>
 
                 {/* Navigation Links */}
                 <div className="navbar-links">
@@ -52,22 +65,23 @@ const Navbar = () => {
                             border: 'none',
                             cursor: 'pointer',
                             fontSize: '16px',
-                            color: '#007bff',
+                            color: '#008080',
                             padding: '8px 12px',
                             borderRadius: '4px',
+                            fontFamily: 'Kreon, serif',
                         }}
                         onMouseEnter={(e) => e.currentTarget.style.backgroundColor = '#e9ecef'}
                         onMouseLeave={(e) => e.currentTarget.style.backgroundColor = 'transparent'}
                     >
-                        Search
+                        search
                     </button>
 
                     {user ? (
                         <>
-                            <Link to="/watchlist" className="nav-link">My Watchlist</Link>
-                            <span className="navbar-user">👋 {user.username || user.email}</span>
-                            <button onClick={handleLogout} className="logout-button">
-                                Logout
+                            <Link to="/watchlist" className="nav-link">my watchlist</Link>
+                            <span className="navbar-user">🔒{user.username || user.email}</span>
+                            <button onClick={handleLogout} className="logout-button" style={{ fontFamily: 'Kreon, serif', backgroundColor: '#800000' }}>
+                                logout
                             </button>
                         </>
                     ) : (
