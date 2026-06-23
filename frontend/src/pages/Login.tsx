@@ -24,6 +24,9 @@ const Login: React.FC = () => {
         }
     };
 
+    const goToRegister = () => {
+        navigate('/register');
+    };
     return (
         <div>
             <h2>Login</h2>
@@ -49,6 +52,23 @@ const Login: React.FC = () => {
                 </div>
                 <button type="submit">Login</button>
             </form>
+            <p className="auth-redirect">
+                Don't have an account?{' '}
+                <button
+                    onClick={goToRegister}
+                    style={{
+                        background: 'none',
+                        border: 'none',
+                        color: '#8B0000',
+                        fontWeight: 'bold',
+                        cursor: 'pointer',
+                        fontSize: 'inherit',
+                        textDecoration: 'underline'
+                    }}
+                >
+                    Register here
+                </button>
+            </p>
         </div>
     );
 };

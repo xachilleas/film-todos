@@ -82,9 +82,9 @@ const Home = () => {
             width: '100%'
         }}>
             <h2 style={{ fontSize: '20px', fontWeight: '400', color: '#666', marginBottom: '10px' }}>
-                Search Movies
+                search movies
             </h2>
-            {user && <p>Welcome, {user.username}!</p>}
+            {user && <p>welcome, {user.username}!</p>}
 
             <div style={{
                 display: 'flex',
@@ -95,7 +95,7 @@ const Home = () => {
             }}>
                 <input
                     type="text"
-                    placeholder="Search for a movie..."
+                    placeholder="search for a movie..."
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
                     onKeyDown={(e) => e.key === 'Enter' && handleSearch()}
@@ -232,7 +232,7 @@ const Home = () => {
             </div>
 
             {!loading && movies.length === 0 && !error && (
-                <p style={{ textAlign: 'center', color: '#666' }}>Search for movies above</p>
+                <p style={{ textAlign: 'center', color: '#666' }}>search for movies above</p>
             )}
         </div>
     );
