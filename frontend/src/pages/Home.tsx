@@ -70,17 +70,7 @@ const Home = () => {
     };
 
     return (
-        <div style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            minHeight: 'calc(100vh - 180px)',
-            padding: '20px',
-            maxWidth: '800px',
-            margin: '0 auto',
-            width: '100%'
-        }}>
+        <div className="home-container">
             <h2 style={{ fontSize: '20px', fontWeight: '400', color: '#666', marginBottom: '10px' }}>
                 search movies
             </h2>

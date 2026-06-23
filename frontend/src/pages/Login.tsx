@@ -29,7 +29,7 @@ const Login: React.FC = () => {
     };
 
     return (
-        <div className="auth-container">
+        <div className="auth-container login-page">
             <div className="auth-card">
                 <h2 className="auth-title">welcome back</h2>
                 <p className="auth-subtitle">login to your film-todos account</p>

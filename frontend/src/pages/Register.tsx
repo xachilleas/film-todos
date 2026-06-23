@@ -43,7 +43,7 @@ const Register: React.FC = () => {
     };
 
     return (
-        <div className="auth-container">
+        <div className="auth-container register-page">
             <div className="auth-card">
                 <h2 className="auth-title">create account</h2>
                 <p className="auth-subtitle">join film-todos and start building your watchlist</p>
