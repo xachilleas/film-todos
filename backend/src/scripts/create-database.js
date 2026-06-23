@@ -45,7 +45,7 @@ async function setupDatabase() {
             IF NOT EXISTS (SELECT * FROM sysobjects WHERE name='Users' AND xtype='U')
             CREATE TABLE Users (
                 id INT IDENTITY(1,1) PRIMARY KEY,
-                username NVARCHAR(100) UNIQUE NOT NULL,
+                username NVARCHAR(100) NOT NULL,
                 email NVARCHAR(255) UNIQUE NOT NULL,
                 password NVARCHAR(255) NOT NULL,
                 created_at DATETIME DEFAULT GETDATE()
