@@ -4,6 +4,8 @@ import { useAuth } from '../contexts/AuthContext';
 import { watchlistService } from '../services/watchlistService';
 import type { WatchlistItem } from '../types';
 import Toast from "../components/Toast.tsx";
+import { FiTrash2 } from 'react-icons/fi';
+
 
 const Watchlist = () => {
     const [watchlist, setWatchlist] = useState<WatchlistItem[]>([]);
@@ -154,14 +156,35 @@ const Watchlist = () => {
                             <span className="movie-year">{item.year}</span>
                         </div>
 
-                        {/* Remove Button */}
+                        {/* Remove Button - Trash Icon */}
                         <button
                             onClick={() => handleRemove(item.imdb_id)}
                             disabled={removingId === item.imdb_id}
                             className="remove-button"
-                            style={{ fontFamily: 'Kreon, serif', backgroundColor: '#800000' }}
+                            title="Remove from watchlist"
+                            style={{
+                                background: 'none',
+                                border: 'none',
+                                cursor: 'pointer',
+                                padding: '8px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                            }}
                         >
-                            {removingId === item.imdb_id ? 'Removing...' : '✕ remove'}
+                            {removingId === item.imdb_id ? (
+                                <span style={{ fontSize: '14px', color: '#999' }}>...</span>
+                            ) : (
+                                <FiTrash2
+                                    size={20}
+                                    style={{
+                                        color: '#999',
+                                        transition: 'color 0.2s ease'
+                                    }}
+                                    onMouseEnter={(e) => e.currentTarget.style.color = '#8B0000'}
+                                    onMouseLeave={(e) => e.currentTarget.style.color = '#999'}
+                                />
+                            )}
                         </button>
                     </div>
                 ))}
