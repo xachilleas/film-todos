@@ -27,48 +27,55 @@ const Login: React.FC = () => {
     const goToRegister = () => {
         navigate('/register');
     };
+
     return (
-        <div>
-            <h2>Login</h2>
-            {error && <p style={{ color: 'red' }}>{error}</p>}
-            <form onSubmit={handleSubmit}>
-                <div>
-                    <label>Email:</label>
-                    <input
-                        type="email"
-                        value={email}
-                        onChange={(e) => setEmail(e.target.value)}
-                        required
-                    />
-                </div>
-                <div>
-                    <label>Password:</label>
-                    <input
-                        type="password"
-                        value={password}
-                        onChange={(e) => setPassword(e.target.value)}
-                        required
-                    />
-                </div>
-                <button type="submit">Login</button>
-            </form>
-            <p className="auth-redirect">
-                Don't have an account?{' '}
-                <button
-                    onClick={goToRegister}
-                    style={{
-                        background: 'none',
-                        border: 'none',
-                        color: '#8B0000',
-                        fontWeight: 'bold',
-                        cursor: 'pointer',
-                        fontSize: 'inherit',
-                        textDecoration: 'underline'
-                    }}
-                >
-                    Register here
-                </button>
-            </p>
+        <div className="auth-container">
+            <div className="auth-card">
+                <h2 className="auth-title">welcome back</h2>
+                <p className="auth-subtitle">login to your film-Todos account</p>
+
+                {error && <div className="auth-error">{error}</div>}
+
+                <form onSubmit={handleSubmit} className="auth-form">
+                    <div className="form-group">
+                        <label htmlFor="email">email</label>
+                        <input
+                            id="email"
+                            type="email"
+                            value={email}
+                            onChange={(e) => setEmail(e.target.value)}
+                            placeholder="Enter your email"
+                            required
+                        />
+                    </div>
+
+                    <div className="form-group">
+                        <label htmlFor="password">password</label>
+                        <input
+                            id="password"
+                            type="password"
+                            value={password}
+                            onChange={(e) => setPassword(e.target.value)}
+                            placeholder="Enter your password"
+                            required
+                        />
+                    </div>
+
+                    <button type="submit" className="auth-button">
+                        login
+                    </button>
+                </form>
+
+                <p className="auth-redirect">
+                    don't have an account?{' '}
+                    <button
+                        onClick={goToRegister}
+                        className="link-button"
+                    >
+                        register here
+                    </button>
+                </p>
+            </div>
         </div>
     );
 };

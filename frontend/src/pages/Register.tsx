@@ -1,5 +1,5 @@
 import React, { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
 const Register: React.FC = () => {
@@ -16,13 +16,11 @@ const Register: React.FC = () => {
         e.preventDefault();
         setError('');
 
-        // Check if passwords match
         if (password !== confirmPassword) {
             setError('Passwords do not match');
             return;
         }
 
-        // Check password length
         if (password.length < 6) {
             setError('Password must be at least 6 characters');
             return;
@@ -32,7 +30,7 @@ const Register: React.FC = () => {
 
         try {
             await register(username, email, password);
-            navigate('/'); // Redirect to home after successful registration
+            navigate('/');
         } catch (err: any) {
             setError(err.response?.data?.message || 'Registration failed');
         } finally {
@@ -40,17 +38,21 @@ const Register: React.FC = () => {
         }
     };
 
+    const goToLogin = () => {
+        navigate('/login');
+    };
+
     return (
         <div className="auth-container">
             <div className="auth-card">
-                <h2>Create Account</h2>
-                <p className="auth-subtitle">Join Film-Todos and start building your watchlist</p>
+                <h2 className="auth-title">create account</h2>
+                <p className="auth-subtitle">join film-Todos and start building your watchlist</p>
 
                 {error && <div className="auth-error">{error}</div>}
 
-                <form onSubmit={handleSubmit}>
+                <form onSubmit={handleSubmit} className="auth-form">
                     <div className="form-group">
-                        <label htmlFor="username">Username</label>
+                        <label htmlFor="username">username</label>
                         <input
                             id="username"
                             type="text"
@@ -63,7 +65,7 @@ const Register: React.FC = () => {
                     </div>
 
                     <div className="form-group">
-                        <label htmlFor="email">Email</label>
+                        <label htmlFor="email">email</label>
                         <input
                             id="email"
                             type="email"
@@ -75,7 +77,7 @@ const Register: React.FC = () => {
                     </div>
 
                     <div className="form-group">
-                        <label htmlFor="password">Password</label>
+                        <label htmlFor="password">password</label>
                         <input
                             id="password"
                             type="password"
@@ -88,7 +90,7 @@ const Register: React.FC = () => {
                     </div>
 
                     <div className="form-group">
-                        <label htmlFor="confirmPassword">Confirm Password</label>
+                        <label htmlFor="confirmPassword">confirm password</label>
                         <input
                             id="confirmPassword"
                             type="password"
@@ -101,15 +103,21 @@ const Register: React.FC = () => {
 
                     <button
                         type="submit"
-                        disabled={loading}
                         className="auth-button"
+                        disabled={loading}
                     >
-                        {loading ? 'Creating account...' : 'Create Account'}
+                        {loading ? 'Creating account...' : 'create account'}
                     </button>
                 </form>
 
                 <p className="auth-redirect">
-                    Already have an account? <Link to="/login">Login here</Link>
+                    already have an account?{' '}
+                    <button
+                        onClick={goToLogin}
+                        className="link-button"
+                    >
+                        login here
+                    </button>
                 </p>
             </div>
         </div>
