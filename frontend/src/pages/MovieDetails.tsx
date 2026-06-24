@@ -155,22 +155,24 @@ const MovieDetails = () => {
 
     return (
         <div style={{ padding: '20px', maxWidth: '1000px', margin: '0 auto' }}>
-            {/* Back Navigation */}
-            {fromWatchlist ? (
-                <Link
-                    to="/watchlist"
-                    style={{ textDecoration: 'none', color: '#007bff' }}
-                >
-                    ← back to watchlist
-                </Link>
-            ) : (
-                <Link
-                    to={location.state?.fromSearch ? `/?search=${encodeURIComponent(location.state.fromSearch)}` : '/'}
-                    style={{ textDecoration: 'none', color: '#008080' }}
-                >
-                    ← back to search results
-                </Link>
-            )}
+            {/* Back Navigation - Positioned above poster, aligned left */}
+            <div style={{ display: 'flex', justifyContent: 'flex-start', marginBottom: '20px' }}>
+                {fromWatchlist ? (
+                    <Link
+                        to="/watchlist"
+                        style={{ textDecoration: 'none', color: '#008080', fontWeight: 'bold' }}
+                    >
+                        ← back to watchlist
+                    </Link>
+                ) : (
+                    <Link
+                        to={location.state?.fromSearch ? `/?search=${encodeURIComponent(location.state.fromSearch)}` : '/'}
+                        style={{ textDecoration: 'none', color: '#008080', fontWeight: 'bold' }}
+                    >
+                        ← back to search results
+                    </Link>
+                )}
+            </div>
 
             {/* Movie Details Layout */}
             <div style={{ display: 'flex', gap: '40px', marginTop: '20px' }}>
@@ -243,23 +245,8 @@ const MovieDetails = () => {
                     {/* Action Buttons */}
                     <div style={{ display: 'flex', gap: '12px', marginTop: '20px', flexWrap: 'wrap' }}>
                         {fromWatchlist ? (
-                            // Coming from Watchlist - Show Remove button + Back to Watchlist
+                            // Coming from Watchlist - Show Back button + Remove button (swapped)
                             <>
-                                <button
-                                    onClick={handleRemoveFromWatchlist}
-                                    disabled={isRemoving}
-                                    style={{
-                                        padding: '12px 24px',
-                                        backgroundColor: '#dc3545',
-                                        color: 'white',
-                                        border: 'none',
-                                        borderRadius: '4px',
-                                        fontSize: '16px',
-                                        cursor: isRemoving ? 'default' : 'pointer',
-                                    }}
-                                >
-                                    {isRemoving ? 'Removing...' : 'Remove from Watchlist'}
-                                </button>
                                 <Link to="/watchlist" style={{ textDecoration: 'none' }}>
                                     <button
                                         style={{
@@ -275,25 +262,25 @@ const MovieDetails = () => {
                                         ← back to watchlist
                                     </button>
                                 </Link>
-                            </>
-                        ) : (
-                            // Coming from Search - Show Add button + Back to Search
-                            <>
                                 <button
-                                    onClick={handleAddToWatchlist}
-                                    disabled={isAdding || addedToWatchlist}
+                                    onClick={handleRemoveFromWatchlist}
+                                    disabled={isRemoving}
                                     style={{
                                         padding: '12px 24px',
-                                        backgroundColor: addedToWatchlist ? '#6c757d' : '#008080',
+                                        backgroundColor: '#800000',
                                         color: 'white',
                                         border: 'none',
                                         borderRadius: '4px',
                                         fontSize: '16px',
-                                        cursor: addedToWatchlist ? 'default' : 'pointer',
+                                        cursor: isRemoving ? 'default' : 'pointer',
                                     }}
                                 >
-                                    {isAdding ? 'Adding...' : addedToWatchlist ? 'In Watchlist' : 'add to watchlist'}
+                                    {isRemoving ? 'Removing...' : 'Remove from Watchlist'}
                                 </button>
+                            </>
+                        ) : (
+                            // Coming from Search - Show Back button + Add button (swapped)
+                            <>
                                 <Link
                                     to={location.state?.fromSearch ? `/?search=${encodeURIComponent(location.state.fromSearch)}` : '/'}
                                     style={{ textDecoration: 'none' }}
@@ -312,6 +299,21 @@ const MovieDetails = () => {
                                         ← back to search
                                     </button>
                                 </Link>
+                                <button
+                                    onClick={handleAddToWatchlist}
+                                    disabled={isAdding || addedToWatchlist}
+                                    style={{
+                                        padding: '12px 24px',
+                                        backgroundColor: addedToWatchlist ? '#6c757d' : '#008080',
+                                        color: 'white',
+                                        border: 'none',
+                                        borderRadius: '4px',
+                                        fontSize: '16px',
+                                        cursor: addedToWatchlist ? 'default' : 'pointer',
+                                    }}
+                                >
+                                    {isAdding ? 'Adding...' : addedToWatchlist ? 'In Watchlist' : 'add to watchlist'}
+                                </button>
                             </>
                         )}
                     </div>
