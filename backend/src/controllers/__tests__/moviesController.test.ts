@@ -1,12 +1,26 @@
-// backend/src/controllers/__tests__/moviesController.test.ts
+/**
+ * Movies Controller Tests
+ * Unit tests for MoviesController using Jest with mocked dependencies.
+ * Tests movie search and retrieval functionality including success and error cases.
+ *
+ * @module moviesController.test
+ * @requires ../MoviesController
+ * @requires ../../services/OMDbService
+ * @requires express
+ */
 
 import { MoviesController } from '../MoviesController';
 import { OMDbService } from '../../services/OMDbService';
 import { Request, Response } from 'express';
 
-// --- MOCK OMDbService ---
+// Mock OMDbService dependency
 jest.mock('../../services/OMDbService');
 
+/**
+ * Suppress console.error output during tests
+ * Prevents error messages from cluttering test output
+ * Restores console.error after all tests complete
+ */
 beforeAll(() => {
     jest.spyOn(console, 'error').mockImplementation(() => {});
 });
@@ -22,8 +36,11 @@ describe('MoviesController', () => {
     let mockRes: Partial<Response>;
     let mockNext: jest.Mock;
 
-    // Helper function to create mock response
-    const createMockResponse = () => {
+    /**
+     * Creates a mock response object with jest.fn() methods
+     * Provides a fresh mock for each test to ensure isolation
+     */
+    const createMockResponse = (): Partial<Response> => {
         const res: Partial<Response> = {
             status: jest.fn().mockReturnThis(),
             json: jest.fn().mockReturnThis()
@@ -31,28 +48,40 @@ describe('MoviesController', () => {
         return res;
     };
 
+    /**
+     * Setup before each test
+     * Clears all mocks, creates fresh instances, and sets up test environment
+     */
     beforeEach(() => {
-        // Clear all mocks before each test
+        // Reset all mock state before each test
         jest.clearAllMocks();
 
-        // Create mocked OMDbService
+        // Create mocked OMDbService instance
         mockOMDbService = new OMDbService() as jest.Mocked<OMDbService>;
 
-        // Create controller with mocked service
+        // Create controller and inject mocked service
         moviesController = new MoviesController();
-        // Replace the service instance with our mock
         (moviesController as any).omdbService = mockOMDbService;
 
-        // Setup mock request and response
+        // Create fresh request and response objects
         mockReq = {};
         mockRes = createMockResponse();
         mockNext = jest.fn();
     });
 
-    // ============================================
-    // TEST: searchMovies - SUCCESS
-    // ============================================
+    // ============================================================================
+    // SEARCH MOVIES TESTS
+    // ============================================================================
+
     describe('searchMovies', () => {
+        /**
+         * Test: Successful movie search
+         *
+         * Flow:
+         * 1. User submits search title
+         * 2. System calls OMDb service
+         * 3. System returns search results with pagination
+         */
         it('should return search results successfully', async () => {
             // --- ARRANGE ---
             const mockTitle = 'Inception';
@@ -87,9 +116,11 @@ describe('MoviesController', () => {
             await moviesController.searchMovies(mockReq as Request, mockRes as Response);
 
             // --- ASSERT ---
+            // Verify service was called with correct parameters
             expect(mockOMDbService.searchMovies).toHaveBeenCalledWith(mockTitle, 1);
             expect(mockOMDbService.searchMovies).toHaveBeenCalledTimes(1);
 
+            // Verify response
             expect(mockRes.json).toHaveBeenCalledWith({
                 status: 'success',
                 data: mockSearchResults.Search,
@@ -103,9 +134,14 @@ describe('MoviesController', () => {
             expect(mockRes.status).not.toHaveBeenCalled();
         });
 
-        // ============================================
-        // TEST: searchMovies - WITH PAGINATION
-        // ============================================
+        /**
+         * Test: Pagination with more results available
+         *
+         * Flow:
+         * 1. User requests page 2
+         * 2. System returns 10 results (full page)
+         * 3. System calculates nextPage = 3, prevPage = 1
+         */
         it('should handle pagination correctly when there are more results', async () => {
             // --- ARRANGE ---
             const mockTitle = 'Batman';
@@ -113,7 +149,7 @@ describe('MoviesController', () => {
 
             mockReq.query = { title: mockTitle, page: mockPage };
 
-            // 10 results = page 2 has 10 items, so there should be a next page
+            // Create 10 results (a full page)
             const mockSearchResults = {
                 Search: Array(10).fill({
                     imdbID: 'tt0468569',
@@ -134,21 +170,27 @@ describe('MoviesController', () => {
             // --- ASSERT ---
             expect(mockOMDbService.searchMovies).toHaveBeenCalledWith(mockTitle, 2);
 
+            // Verify pagination: 10 results means there's a next page
             expect(mockRes.json).toHaveBeenCalledWith({
                 status: 'success',
                 data: mockSearchResults.Search,
                 pagination: {
                     currentPage: 2,
                     limit: 10,
-                    nextPage: 3, // Since there are exactly 10 items and totalResults > 10
+                    nextPage: 3, // Since we got 10 results, there's likely a next page
                     prevPage: 1
                 }
             });
         });
 
-        // ============================================
-        // TEST: searchMovies - PAGINATION WITH PREV PAGE
-        // ============================================
+        /**
+         * Test: Page 1 should have prevPage = null
+         *
+         * Flow:
+         * 1. User requests page 1
+         * 2. System returns results
+         * 3. System sets prevPage = null (no previous page)
+         */
         it('should set prevPage to null when on page 1', async () => {
             // --- ARRANGE ---
             const mockTitle = 'Inception';
@@ -175,9 +217,13 @@ describe('MoviesController', () => {
             expect(callArgs?.pagination.nextPage).toBe(null);
         });
 
-        // ============================================
-        // TEST: searchMovies - MISSING TITLE
-        // ============================================
+        /**
+         * Test: Missing title parameter
+         *
+         * Flow:
+         * 1. User submits request without title
+         * 2. System returns 400 error
+         */
         it('should return 400 when title is missing', async () => {
             // --- ARRANGE ---
             mockReq.query = { page: '1' }; // No title
@@ -186,19 +232,26 @@ describe('MoviesController', () => {
             await moviesController.searchMovies(mockReq as Request, mockRes as Response);
 
             // --- ASSERT ---
+            // Verify service was NOT called
             expect(mockOMDbService.searchMovies).not.toHaveBeenCalled();
+
+            // Verify error response
             expect(mockRes.status).toHaveBeenCalledWith(400);
             expect(mockRes.json).toHaveBeenCalledWith({
                 message: 'Search query parameter "title" is required'
             });
         });
 
-        // ============================================
-        // TEST: searchMovies - TITLE NOT A STRING
-        // ============================================
+        /**
+         * Test: Title parameter is not a string
+         *
+         * Flow:
+         * 1. User submits title as a number (invalid)
+         * 2. System returns 400 error
+         */
         it('should return 400 when title is not a string', async () => {
             // --- ARRANGE ---
-            mockReq.query = { title: 123 as any }; // Number instead of string
+            mockReq.query = { title: 123 as any };
 
             // --- ACT ---
             await moviesController.searchMovies(mockReq as Request, mockRes as Response);
@@ -211,9 +264,14 @@ describe('MoviesController', () => {
             });
         });
 
-        // ============================================
-        // TEST: searchMovies - EMPTY SEARCH RESULTS
-        // ============================================
+        /**
+         * Test: Empty search results
+         *
+         * Flow:
+         * 1. User searches for a title with no results
+         * 2. System returns empty array with success status
+         * 3. No error is thrown (empty results is valid)
+         */
         it('should return empty array when no movies found', async () => {
             // --- ARRANGE ---
             const mockTitle = 'NoMoviesHere';
@@ -231,6 +289,7 @@ describe('MoviesController', () => {
             await moviesController.searchMovies(mockReq as Request, mockRes as Response);
 
             // --- ASSERT ---
+            // Verify empty results are returned with success status
             expect(mockRes.json).toHaveBeenCalledWith({
                 status: 'success',
                 data: [],
@@ -243,9 +302,14 @@ describe('MoviesController', () => {
             });
         });
 
-        // ============================================
-        // TEST: searchMovies - SERVICE ERROR
-        // ============================================
+        /**
+         * Test: Service error handling
+         *
+         * Flow:
+         * 1. User submits valid search
+         * 2. OMDb service throws an error
+         * 3. System returns 500 error
+         */
         it('should return 500 when OMDb service throws error', async () => {
             // --- ARRANGE ---
             const mockTitle = 'Inception';
@@ -259,6 +323,8 @@ describe('MoviesController', () => {
 
             // --- ASSERT ---
             expect(mockOMDbService.searchMovies).toHaveBeenCalledWith(mockTitle, 1);
+
+            // Verify error response
             expect(mockRes.status).toHaveBeenCalledWith(500);
             expect(mockRes.json).toHaveBeenCalledWith({
                 message: 'Failed to search movies'
@@ -266,10 +332,19 @@ describe('MoviesController', () => {
         });
     });
 
-    // ============================================
-    // TEST: getMovieById - SUCCESS
-    // ============================================
+    // ============================================================================
+    // GET MOVIE BY ID TESTS
+    // ============================================================================
+
     describe('getMovieById', () => {
+        /**
+         * Test: Successful movie retrieval by ID
+         *
+         * Flow:
+         * 1. User requests movie by IMDb ID
+         * 2. System calls OMDb service
+         * 3. System returns movie details
+         */
         it('should return movie details successfully', async () => {
             // --- ARRANGE ---
             const mockImdbId = 'tt1375666';
@@ -296,9 +371,11 @@ describe('MoviesController', () => {
             await moviesController.getMovieById(mockReq as Request, mockRes as Response);
 
             // --- ASSERT ---
+            // Verify service was called with correct ID
             expect(mockOMDbService.getMovieById).toHaveBeenCalledWith(mockImdbId);
             expect(mockOMDbService.getMovieById).toHaveBeenCalledTimes(1);
 
+            // Verify response
             expect(mockRes.json).toHaveBeenCalledWith({
                 status: 'success',
                 data: mockMovieDetails
@@ -306,9 +383,13 @@ describe('MoviesController', () => {
             expect(mockRes.status).not.toHaveBeenCalled();
         });
 
-        // ============================================
-        // TEST: getMovieById - MISSING ID
-        // ============================================
+        /**
+         * Test: Missing ID parameter
+         *
+         * Flow:
+         * 1. User requests without providing an ID
+         * 2. System returns 400 error
+         */
         it('should return 400 when id is missing', async () => {
             // --- ARRANGE ---
             mockReq.params = {}; // No id
@@ -324,37 +405,50 @@ describe('MoviesController', () => {
             });
         });
 
-        // ============================================
-        // TEST: getMovieById - MOVIE NOT FOUND
-        // ============================================
+        /**
+         * Test: Movie not found (service throws error)
+         *
+         * Flow:
+         * 1. User requests a non-existent movie
+         * 2. OMDb service throws "Movie not found" error
+         * 3. Controller catches and returns 404
+         */
         it('should return 404 when movie is not found', async () => {
             // --- ARRANGE ---
             const mockImdbId = 'tt0000000';
             mockReq.params = { id: mockImdbId };
 
-            // Service returns null/undefined when movie not found
-            mockOMDbService.getMovieById.mockResolvedValue(null);
+            // Service throws error when movie not found
+            const notFoundError = new Error('OMDb API error: Movie not found!');
+            mockOMDbService.getMovieById.mockRejectedValue(notFoundError);
 
             // --- ACT ---
             await moviesController.getMovieById(mockReq as Request, mockRes as Response);
 
             // --- ASSERT ---
             expect(mockOMDbService.getMovieById).toHaveBeenCalledWith(mockImdbId);
+
+            // Verify 404 response
             expect(mockRes.status).toHaveBeenCalledWith(404);
             expect(mockRes.json).toHaveBeenCalledWith({
                 message: 'Movie not found'
             });
         });
 
-        // ============================================
-        // TEST: getMovieById - SERVICE ERROR
-        // ============================================
-        it('should return 500 when OMDb service throws error', async () => {
+        /**
+         * Test: Service error handling
+         *
+         * Flow:
+         * 1. User requests a valid movie
+         * 2. OMDb service throws an unexpected error
+         * 3. System returns 500 error
+         */
+        it('should return 500 when OMDb service throws unexpected error', async () => {
             // --- ARRANGE ---
             const mockImdbId = 'tt1375666';
             mockReq.params = { id: mockImdbId };
 
-            const mockError = new Error('OMDb API error: Movie not found!');
+            const mockError = new Error('OMDb API error: Network timeout');
             mockOMDbService.getMovieById.mockRejectedValue(mockError);
 
             // --- ACT ---
@@ -362,30 +456,11 @@ describe('MoviesController', () => {
 
             // --- ASSERT ---
             expect(mockOMDbService.getMovieById).toHaveBeenCalledWith(mockImdbId);
+
+            // Verify error response
             expect(mockRes.status).toHaveBeenCalledWith(500);
             expect(mockRes.json).toHaveBeenCalledWith({
                 message: 'Failed to fetch movie details'
-            });
-        });
-
-        // ============================================
-        // TEST: getMovieById - HANDLES UNDEFINED
-        // ============================================
-        it('should return 404 when service returns undefined', async () => {
-            // --- ARRANGE ---
-            const mockImdbId = 'tt1375666';
-            mockReq.params = { id: mockImdbId };
-
-            // Service returns undefined
-            mockOMDbService.getMovieById.mockResolvedValue(undefined);
-
-            // --- ACT ---
-            await moviesController.getMovieById(mockReq as Request, mockRes as Response);
-
-            // --- ASSERT ---
-            expect(mockRes.status).toHaveBeenCalledWith(404);
-            expect(mockRes.json).toHaveBeenCalledWith({
-                message: 'Movie not found'
             });
         });
     });

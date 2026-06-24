@@ -1,7 +1,19 @@
-// backend/src/routes/watchlistRoutes.ts
+/**
+ * Watchlist Routes
+ * Defines API endpoints for watchlist operations.
+ * All routes require JWT authentication.
+ * Includes Swagger documentation for API testing and reference.
+ *
+ * @module watchlistRoutes
+ * @requires express
+ * @requires ../controllers/WatchlistController
+ * @requires ../middleware/validate
+ * @requires ../validators/schemas
+ * @requires ../middleware/auth
+ */
 
 import express from 'express';
-import watchlistController from '../controllers/WatchlistController';  // ← No curly braces, no 'new'
+import watchlistController from '../controllers/WatchlistController';
 import { validateBody, validateQuery, validateParams } from '../middleware/validate';
 import {
     addToWatchlistSchema,
@@ -10,11 +22,23 @@ import {
 } from '../validators/schemas';
 import { authMiddleware } from '../middleware/auth';
 
+// Initialize router
 const router = express.Router();
 
-// All watchlist routes require authentication
+// ============================================================================
+// AUTHENTICATION MIDDLEWARE
+// ============================================================================
+
+/**
+ * Apply authentication middleware to all watchlist routes
+ * All watchlist operations require a valid JWT token
+ * This ensures only authenticated users can access their watchlist
+ */
 router.use(authMiddleware);
 
+// ============================================================================
+// SWAGGER DOCUMENTATION - GET WATCHLIST ENDPOINT
+// ============================================================================
 
 /**
  * @swagger
@@ -103,12 +127,21 @@ router.use(authMiddleware);
  *       400:
  *         description: Validation error
  */
-// GET /api/watchlist - Get user's watchlist
+
+/**
+ * Get authenticated user's watchlist with pagination
+ * GET /api/watchlist?page=1&limit=10
+ * Validates query parameters against getWatchlistSchema before passing to controller
+ */
 router.get(
     '/',
     validateQuery(getWatchlistSchema),
-    watchlistController.getUserWatchlist  // ← Directly use the instance method
+    watchlistController.getUserWatchlist
 );
+
+// ============================================================================
+// SWAGGER DOCUMENTATION - ADD TO WATCHLIST ENDPOINT
+// ============================================================================
 
 /**
  * @swagger
@@ -177,12 +210,22 @@ router.get(
  *       401:
  *         description: Unauthorized - No token provided
  */
-// POST /api/watchlist - Add movie to watchlist
+
+/**
+ * Add a movie to authenticated user's watchlist
+ * POST /api/watchlist
+ * Request body: { imdbId: "tt1375666" }
+ * Validates body against addToWatchlistSchema before passing to controller
+ */
 router.post(
     '/',
     validateBody(addToWatchlistSchema),
-    watchlistController.addToWatchlist  // ← Directly use the instance method
+    watchlistController.addToWatchlist
 );
+
+// ============================================================================
+// SWAGGER DOCUMENTATION - REMOVE FROM WATCHLIST ENDPOINT
+// ============================================================================
 
 /**
  * @swagger
@@ -224,11 +267,15 @@ router.post(
  *         description: Movie not found in watchlist
  */
 
-// DELETE /api/watchlist/:imdbId - Remove movie from watchlist
+/**
+ * Remove a movie from authenticated user's watchlist
+ * DELETE /api/watchlist/:imdbId
+ * Validates URL parameters against removeFromWatchlistSchema before passing to controller
+ */
 router.delete(
     '/:imdbId',
     validateParams(removeFromWatchlistSchema),
-    watchlistController.removeFromWatchlist  // ← Directly use the instance method
+    watchlistController.removeFromWatchlist
 );
 
 export default router;

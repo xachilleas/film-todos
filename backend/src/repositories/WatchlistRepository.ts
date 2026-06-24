@@ -1,5 +1,26 @@
+/**
+ * Watchlist Repository
+ * Handles database operations for the WatchlistItems table.
+ * Provides CRUD operations for managing user watchlists with pagination support.
+ *
+ * @module WatchlistRepository
+ * @requires ../utils/db
+ */
+
 import { getPool } from '../utils/db';
 
+/**
+ * WatchlistItem Interface
+ * Represents a movie entry in a user's watchlist
+ *
+ * @property {number} [id] - Unique watchlist item identifier (auto-generated)
+ * @property {number} user_id - ID of the user who owns this watchlist item
+ * @property {string} imdb_id - Unique IMDb identifier (e.g., 'tt1375666')
+ * @property {string} title - Movie title
+ * @property {string} year - Release year
+ * @property {string} poster - URL to movie poster image
+ * @property {Date} [added_at] - Timestamp when movie was added to watchlist (auto-generated)
+ */
 export interface WatchlistItem {
     id?: number;
     user_id: number;
@@ -10,19 +31,40 @@ export interface WatchlistItem {
     added_at?: Date;
 }
 
+/**
+ * Watchlist Repository Class
+ * Encapsulates all database operations related to user watchlists
+ * Ensures data integrity with existence checks and duplicate prevention
+ */
 export class WatchlistRepository {
 
-    // Save a movie to user's watchlist
+    /**
+     * Saves a movie to a user's watchlist
+     * Prevents duplicate entries by checking if movie already exists
+     *
+     * @param {Omit<WatchlistItem, 'id' | 'added_at'>} item - Watchlist item without auto-generated fields
+     * @returns {Promise<WatchlistItem>} The created watchlist item with id and added_at populated
+     * @throws {Error} If movie is already in the user's watchlist
+     *
+     * @example
+     * const watchlistItem = await watchlistRepository.save({
+     *   user_id: 1,
+     *   imdb_id: 'tt1375666',
+     *   title: 'Inception',
+     *   year: '2010',
+     *   poster: 'https://m.media-amazon.com/images/...'
+     * });
+     */
     async save(item: Omit<WatchlistItem, 'id' | 'added_at'>): Promise<WatchlistItem> {
         const pool = getPool();
 
-        // Check if movie already exists in user's watchlist
+        // Prevent duplicate watchlist entries
         const exists = await this.exists(item.user_id, item.imdb_id);
         if (exists) {
             throw new Error('Movie already in watchlist');
         }
 
-        // Insert the movie
+        // Insert the movie and return the created record
         const result = await pool.request()
             .input('user_id', item.user_id)
             .input('imdb_id', item.imdb_id)
@@ -39,22 +81,43 @@ export class WatchlistRepository {
         return result.recordset[0];
     }
 
-    // Get all watchlist items for a user (with pagination)
-    async findByUserId(userId: number, limit?: number, offset?: number): Promise<{ items: WatchlistItem[]; total: number }> {
+    /**
+     * Retrieves all watchlist items for a specific user with pagination
+     * Returns items ordered by most recently added first
+     *
+     * @param {number} userId - ID of the user
+     * @param {number} [limit] - Maximum number of items to return (for pagination)
+     * @param {number} [offset] - Number of items to skip (for pagination)
+     * @returns {Promise<{ items: WatchlistItem[]; total: number }>}
+     *          Paginated items and total count for the user
+     *
+     * @example
+     * // Get first 10 items
+     * const { items, total } = await watchlistRepository.findByUserId(1, 10, 0);
+     *
+     * @example
+     * // Get next 10 items (page 2)
+     * const { items, total } = await watchlistRepository.findByUserId(1, 10, 10);
+     */
+    async findByUserId(
+        userId: number,
+        limit?: number,
+        offset?: number
+    ): Promise<{ items: WatchlistItem[]; total: number }> {
         const pool = getPool();
 
-        // First, get the total count of items for this user
+        // Get total count of watchlist items for this user
         const countResult = await pool.request()
             .input('user_id', userId)
             .query('SELECT COUNT(*) as total FROM WatchlistItems WHERE user_id = @user_id');
 
         const total = countResult.recordset[0].total;
 
-        // Then, get the paginated items
+        // Build the main query to retrieve items
         let query = 'SELECT * FROM WatchlistItems WHERE user_id = @user_id ORDER BY added_at DESC';
         const request = pool.request().input('user_id', userId);
 
-        // Add pagination if limit and offset are provided
+        // Apply pagination if both limit and offset are provided
         if (limit !== undefined && offset !== undefined) {
             query += ' OFFSET @offset ROWS FETCH NEXT @limit ROWS ONLY';
             request.input('offset', offset);
@@ -69,23 +132,53 @@ export class WatchlistRepository {
         };
     }
 
-    // Delete a movie from user's watchlist
+    /**
+     * Removes a movie from a user's watchlist
+     *
+     * @param {number} userId - ID of the user
+     * @param {string} imdbId - IMDb ID of the movie to remove
+     * @returns {Promise<boolean>} true if item was successfully removed, false if it didn't exist
+     *
+     * @example
+     * const deleted = await watchlistRepository.delete(1, 'tt1375666');
+     * if (deleted) {
+     *   // Movie was removed from watchlist
+     * }
+     */
     async delete(userId: number, imdbId: string): Promise<boolean> {
         const pool = getPool();
+
+        // Execute deletion
         const result = await pool.request()
             .input('user_id', userId)
             .input('imdb_id', imdbId)
             .query('DELETE FROM WatchlistItems WHERE user_id = @user_id AND imdb_id = @imdb_id');
 
-        // Simple approach: try to find if it still exists after delete
-        // If it doesn't exist, deletion was successful
+        /**
+         * Check if the item still exists after deletion
+         * If it no longer exists, deletion was successful
+         */
         const stillExists = await this.exists(userId, imdbId);
         return !stillExists;
     }
 
-    // Check if a movie exists in user's watchlist
+    /**
+     * Checks if a movie exists in a user's watchlist
+     * Used for duplicate prevention and existence validation
+     *
+     * @param {number} userId - ID of the user
+     * @param {string} imdbId - IMDb ID of the movie to check
+     * @returns {Promise<boolean>} true if movie exists in watchlist, false otherwise
+     *
+     * @example
+     * const exists = await watchlistRepository.exists(1, 'tt1375666');
+     * if (exists) {
+     *   // Movie is already in watchlist
+     * }
+     */
     async exists(userId: number, imdbId: string): Promise<boolean> {
         const pool = getPool();
+
         const result = await pool.request()
             .input('user_id', userId)
             .input('imdb_id', imdbId)

@@ -1,8 +1,26 @@
-// backend/src/validators/schemas.ts
+/**
+ * Zod Validation Schemas
+ * Defines validation rules for all API request data.
+ * Provides consistent validation across the application with meaningful error messages.
+ *
+ * @module schemas
+ * @requires zod
+ */
 
 import { z } from 'zod';
 
-// --- USER SCHEMAS ---
+// ============================================================================
+// USER SCHEMAS - Authentication & Registration
+// ============================================================================
+
+/**
+ * Registration validation schema
+ * Validates user input when creating a new account
+ *
+ * @property {string} username - 3-50 chars, alphanumeric + underscore only
+ * @property {string} email - Valid email format, max 100 chars
+ * @property {string} password - Minimum 6 characters, max 255 chars
+ */
 export const registerSchema = z.object({
     username: z.string()
         .min(3, 'Username must be at least 3 characters')
@@ -16,6 +34,13 @@ export const registerSchema = z.object({
         .max(255, 'Password cannot exceed 255 characters')
 });
 
+/**
+ * Login validation schema
+ * Validates user credentials for authentication
+ *
+ * @property {string} email - Valid email format
+ * @property {string} password - Password is required (min 1 char)
+ */
 export const loginSchema = z.object({
     email: z.string()
         .email('Please provide a valid email address'),
@@ -23,7 +48,17 @@ export const loginSchema = z.object({
         .min(1, 'Password is required')
 });
 
-// --- MOVIE SCHEMAS ---
+// ============================================================================
+// MOVIE SCHEMAS - OMDb API Search & Retrieval
+// ============================================================================
+
+/**
+ * Movie search validation schema
+ * Validates search parameters for OMDb API queries
+ *
+ * @property {string} title - Search title (1-100 chars)
+ * @property {string} [page] - Page number (defaults to '1')
+ */
 export const searchMoviesSchema = z.object({
     title: z.string()
         .min(1, 'Search title is required')
@@ -39,22 +74,50 @@ export const searchMoviesSchema = z.object({
         })
 });
 
+/**
+ * Movie by ID validation schema
+ * Validates OMDb movie ID format
+ *
+ * @property {string} id - IMDb ID format: 'tt' followed by numbers (e.g., 'tt1375666')
+ */
 export const getMovieByIdSchema = z.object({
     id: z.string()
         .regex(/^tt\d+$/, 'Invalid movie ID format (must start with "tt" followed by numbers)')
 });
 
-// --- WATCHLIST SCHEMAS ---
+// ============================================================================
+// WATCHLIST SCHEMAS - User Watchlist Operations
+// ============================================================================
+
+/**
+ * Add to watchlist validation schema
+ * Validates movie ID when adding to user's watchlist
+ *
+ * @property {string} imdbId - IMDb ID format: 'tt' followed by numbers
+ */
 export const addToWatchlistSchema = z.object({
     imdbId: z.string()
         .regex(/^tt\d+$/, 'Invalid movie ID format (must start with "tt" followed by numbers)')
 });
 
+/**
+ * Remove from watchlist validation schema
+ * Validates movie ID when removing from user's watchlist
+ *
+ * @property {string} imdbId - IMDb ID format: 'tt' followed by numbers
+ */
 export const removeFromWatchlistSchema = z.object({
     imdbId: z.string()
         .regex(/^tt\d+$/, 'Invalid movie ID format (must start with "tt" followed by numbers)')
 });
 
+/**
+ * Watchlist pagination validation schema
+ * Validates query parameters for retrieving paginated watchlist
+ *
+ * @property {string} [page] - Page number (defaults to '1', must be positive)
+ * @property {string} [limit] - Items per page (defaults to '10', between 1-100)
+ */
 export const getWatchlistSchema = z.object({
     page: z.string()
         .optional()
@@ -76,7 +139,19 @@ export const getWatchlistSchema = z.object({
         })
 });
 
-// --- INFERRED TYPES (optional - for TypeScript) ---
+// ============================================================================
+// INFERRED TYPES - TypeScript Type Definitions
+// ============================================================================
+
+/**
+ * TypeScript types inferred from Zod schemas
+ * These provide type safety in controllers and services
+ *
+ * @example
+ * // In a controller:
+ * const validatedData: RegisterInput = req.body;
+ * const user = await createUser(validatedData);
+ */
 export type RegisterInput = z.infer<typeof registerSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;
 export type SearchMoviesInput = z.infer<typeof searchMoviesSchema>;

@@ -1,13 +1,27 @@
-// backend/src/routes/moviesRoutes.ts
+/**
+ * Movie Routes
+ * Defines API endpoints for movie search and retrieval operations.
+ * Includes Swagger documentation for API testing and reference.
+ *
+ * @module moviesRoutes
+ * @requires express
+ * @requires ../controllers/MoviesController
+ * @requires ../middleware/validate
+ * @requires ../validators/schemas
+ */
 
 import express from 'express';
 import { MoviesController } from '../controllers/MoviesController';
 import { validateQuery, validateParams } from '../middleware/validate';
 import { searchMoviesSchema, getMovieByIdSchema } from '../validators/schemas';
 
+// Initialize router and controller
 const router = express.Router();
 const moviesController = new MoviesController();
 
+// ============================================================================
+// SWAGGER DOCUMENTATION - SEARCH MOVIES ENDPOINT
+// ============================================================================
 
 /**
  * @swagger
@@ -107,12 +121,21 @@ const moviesController = new MoviesController();
  *       500:
  *         description: Server error
  */
-// GET /api/movies/search - Search movies
+
+/**
+ * Search for movies by title
+ * GET /api/movies/search?title=Inception&page=1
+ * Validates query parameters against searchMoviesSchema before passing to controller
+ */
 router.get(
     '/search',
     validateQuery(searchMoviesSchema),
     moviesController.searchMovies
 );
+
+// ============================================================================
+// SWAGGER DOCUMENTATION - GET MOVIE BY ID ENDPOINT
+// ============================================================================
 
 /**
  * @swagger
@@ -182,7 +205,11 @@ router.get(
  *         description: Server error
  */
 
-// GET /api/movies/:id - Get movie by ID
+/**
+ * Get movie details by IMDb ID
+ * GET /api/movies/:id
+ * Validates URL parameters against getMovieByIdSchema before passing to controller
+ */
 router.get(
     '/:id',
     validateParams(getMovieByIdSchema),

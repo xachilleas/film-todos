@@ -1,5 +1,18 @@
+/**
+ * Swagger/OpenAPI Configuration
+ * Generates API documentation for the Film-Todos application.
+ * Documentation is available at /api-docs when the server is running.
+ *
+ * @module swagger
+ * @requires swagger-jsdoc
+ */
+
 import swaggerJsdoc from 'swagger-jsdoc';
 
+/**
+ * Swagger configuration options
+ * Defines the OpenAPI specification structure and documentation sources
+ */
 const options = {
     definition: {
         openapi: '3.0.0',
@@ -29,7 +42,10 @@ const options = {
             },
         ],
     },
-    // Explicitly list the route files
+    /**
+     * Paths to route files containing JSDoc comments for Swagger
+     * These files will be scanned for @swagger annotations
+     */
     apis: [
         './src/routes/authRoutes.ts',
         './src/routes/moviesRoutes.ts',
@@ -37,4 +53,8 @@ const options = {
     ],
 };
 
+/**
+ * Generated Swagger/OpenAPI specification
+ * Used by swagger-ui-express to render the documentation UI
+ */
 export const specs = swaggerJsdoc(options);
