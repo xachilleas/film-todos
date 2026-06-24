@@ -3,6 +3,8 @@ import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import { movieService } from '../services/movieService';
 import type { Movie } from '../services/movieService';
+import { MdNoPhotography } from 'react-icons/md';
+
 
 const Home = () => {
     const [searchTerm, setSearchTerm] = useState('');
@@ -183,24 +185,11 @@ const Home = () => {
                                             alignItems: 'center',
                                             justifyContent: 'center',
                                         }}>
-                                            <svg
-                                                width="64"
-                                                height="64"
-                                                viewBox="0 0 24 24"
-                                                fill="none"
-                                                stroke="#ccc"
-                                                strokeWidth="1.5"
-                                                strokeLinecap="round"
-                                                strokeLinejoin="round"
-                                            >
-                                                <rect x="2" y="4" width="20" height="16" rx="2" />
-                                                <rect x="6" y="7" width="3" height="2" />
-                                                <rect x="6" y="11" width="3" height="2" />
-                                                <rect x="6" y="15" width="3" height="2" />
-                                                <rect x="15" y="7" width="3" height="2" />
-                                                <rect x="15" y="11" width="3" height="2" />
-                                                <rect x="15" y="15" width="3" height="2" />
-                                            </svg>
+                                            <MdNoPhotography
+                                                size={64}
+                                                color="#ccc"
+                                                style={{ opacity: 0.7 }}
+                                            />
                                         </div>
                                     )}
                                 </div>

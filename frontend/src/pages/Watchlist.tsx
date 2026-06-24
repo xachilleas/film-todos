@@ -5,6 +5,8 @@ import { watchlistService } from '../services/watchlistService';
 import type { WatchlistItem } from '../types';
 import Toast from "../components/Toast.tsx";
 import { FiTrash2 } from 'react-icons/fi';
+import { MdNoPhotography } from 'react-icons/md';
+
 
 
 const Watchlist = () => {
@@ -123,24 +125,11 @@ const Watchlist = () => {
                                     borderRadius: '4px',
                                 }}
                             >
-                                <svg
-                                    width="30"
-                                    height="30"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="#ccc"
-                                    strokeWidth="1.5"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                >
-                                    <rect x="2" y="4" width="20" height="16" rx="2" />
-                                    <rect x="6" y="7" width="3" height="2" />
-                                    <rect x="6" y="11" width="3" height="2" />
-                                    <rect x="6" y="15" width="3" height="2" />
-                                    <rect x="15" y="7" width="3" height="2" />
-                                    <rect x="15" y="11" width="3" height="2" />
-                                    <rect x="15" y="15" width="3" height="2" />
-                                </svg>
+                                <MdNoPhotography
+                                    size={30}
+                                    color="#ccc"
+                                    style={{ opacity: 0.7 }}
+                                />
                             </div>
                         </div>
 

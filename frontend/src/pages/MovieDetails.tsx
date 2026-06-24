@@ -5,6 +5,8 @@ import type { MovieDetail } from '../services/movieService';
 import { watchlistService } from '../services/watchlistService';
 import { useAuth } from '../contexts/AuthContext';
 import { useNavigate } from 'react-router-dom';
+import { MdNoPhotography } from 'react-icons/md';
+
 
 const MovieDetails = () => {
     const { id } = useParams<{ id: string }>();
@@ -156,24 +158,11 @@ const MovieDetails = () => {
                                 justifyContent: 'center',
                                 borderRadius: '8px',
                             }}>
-                                <svg
-                                    width="80"
-                                    height="80"
-                                    viewBox="0 0 24 24"
-                                    fill="none"
-                                    stroke="#ccc"
-                                    strokeWidth="1.5"
-                                    strokeLinecap="round"
-                                    strokeLinejoin="round"
-                                >
-                                    <rect x="2" y="4" width="20" height="16" rx="2" />
-                                    <rect x="6" y="7" width="3" height="2" />
-                                    <rect x="6" y="11" width="3" height="2" />
-                                    <rect x="6" y="15" width="3" height="2" />
-                                    <rect x="15" y="7" width="3" height="2" />
-                                    <rect x="15" y="11" width="3" height="2" />
-                                    <rect x="15" y="15" width="3" height="2" />
-                                </svg>
+                                <MdNoPhotography
+                                    size={80}
+                                    color="#ccc"
+                                    style={{ opacity: 0.7 }}
+                                />
                             </div>
                         )}
                     </div>
