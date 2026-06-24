@@ -1,46 +1,74 @@
+/**
+ * Movie Details Page Component
+ * Displays detailed information about a specific movie.
+ * Allows users to add/remove movies from watchlist.
+ *
+ * @module MovieDetails
+ * @requires react
+ * @requires react-router-dom
+ * @requires ../services/movieService
+ * @requires ../services/watchlistService
+ * @requires ../contexts/AuthContext
+ * @requires react-icons/md
+ */
+
 import { useEffect, useState } from 'react';
-import { useParams, Link, useLocation } from 'react-router-dom';
+import { useParams, Link, useLocation, useNavigate } from 'react-router-dom';
 import { movieService } from '../services/movieService';
 import type { MovieDetail } from '../services/movieService';
 import { watchlistService } from '../services/watchlistService';
 import { useAuth } from '../contexts/AuthContext';
-import { useNavigate } from 'react-router-dom';
 import { MdNoPhotography } from 'react-icons/md';
 
-
+/**
+ * Movie Details Page Component
+ *
+ * Features:
+ * - Fetches and displays movie details by IMDb ID
+ * - Add movie to watchlist with authentication check
+ * - Remove movie from watchlist with confirmation
+ * - Back navigation to search results or watchlist
+ * - Poster fallback with Material Design icon
+ * - Loading and error states
+ *
+ * @returns {JSX.Element} Rendered movie details page
+ */
 const MovieDetails = () => {
+    // Route parameters
     const { id } = useParams<{ id: string }>();
+
+    // Hooks
     const { user } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
-    const [isAdding, setIsAdding] = useState(false);
-    const [addedToWatchlist, setAddedToWatchlist] = useState(false);
+
+    // State
     const [movie, setMovie] = useState<MovieDetail | null>(null);
-    const [loading, setLoading] = useState(true);
-    const [error, setError] = useState('');
-    const [imageFailed, setImageFailed] = useState(false);
-    const [isRemoving, setIsRemoving] = useState(false);
-    // Check if user came from watchlist
+    const [loading, setLoading] = useState<boolean>(true);
+    const [error, setError] = useState<string>('');
+    const [imageFailed, setImageFailed] = useState<boolean>(false);
+    const [isAdding, setIsAdding] = useState<boolean>(false);
+    const [isRemoving, setIsRemoving] = useState<boolean>(false);
+    const [addedToWatchlist, setAddedToWatchlist] = useState<boolean>(false);
+
+    // Check if user came from watchlist (for back navigation)
     const fromWatchlist = location.state?.fromWatchlist || false;
 
-
-
+    /**
+     * Fetch movie details on component mount or ID change
+     */
     useEffect(() => {
-        const fetchMovieDetails = async () => {
+        const fetchMovieDetails = async (): Promise<void> => {
             if (!id) return;
 
             setLoading(true);
             setError('');
             setImageFailed(false);
 
-
             try {
                 const data = await movieService.getMovieDetails(id);
-                console.log('🎬 Full movie data:', data);
-                console.log('📝 Keys in movie object:', Object.keys(data));
                 setMovie(data);
             } catch (err: any) {
-                console.error('❌ Error fetching movie:', err);
                 setError(err.response?.data?.message || 'Failed to load movie details');
             } finally {
                 setLoading(false);
@@ -50,7 +78,11 @@ const MovieDetails = () => {
         fetchMovieDetails();
     }, [id]);
 
-    const handleAddToWatchlist = async () => {
+    /**
+     * Add movie to user's watchlist
+     * Redirects to login if user is not authenticated
+     */
+    const handleAddToWatchlist = async (): Promise<void> => {
         if (!user) {
             navigate('/login', { state: { from: `/movie/${id}` } });
             return;
@@ -72,7 +104,11 @@ const MovieDetails = () => {
         }
     };
 
-    const handleRemoveFromWatchlist = async () => {
+    /**
+     * Remove movie from user's watchlist
+     * Shows confirmation dialog before removal
+     */
+    const handleRemoveFromWatchlist = async (): Promise<void> => {
         if (!user) {
             navigate('/login', { state: { from: `/movie/${id}` } });
             return;
@@ -87,20 +123,31 @@ const MovieDetails = () => {
             await watchlistService.removeFromWatchlist(id!);
             setAddedToWatchlist(false);
             alert('Movie removed from watchlist!');
-            // Optionally navigate back to watchlist after removal
+            // Navigate back to watchlist after removal
             navigate('/watchlist');
         } catch (error: any) {
             alert('Failed to remove from watchlist. Please try again.');
-            console.error('Error removing movie:', error);
         } finally {
             setIsRemoving(false);
         }
     };
 
-    if (loading) return <div style={{ padding: '20px' }}>Loading movie details...</div>;
-    if (error) return <div style={{ padding: '20px', color: 'red' }}>{error}</div>;
-    if (!movie) return <div style={{ padding: '20px' }}>Movie not found</div>;
+    // Loading state
+    if (loading) {
+        return <div style={{ padding: '20px' }}>Loading movie details...</div>;
+    }
 
+    // Error state
+    if (error) {
+        return <div style={{ padding: '20px', color: 'red' }}>{error}</div>;
+    }
+
+    // Not found state
+    if (!movie) {
+        return <div style={{ padding: '20px' }}>Movie not found</div>;
+    }
+
+    // Determine if poster placeholder should be shown
     const showPlaceholder = !movie.Poster ||
         movie.Poster === 'N/A' ||
         movie.Poster === '' ||
@@ -108,6 +155,7 @@ const MovieDetails = () => {
 
     return (
         <div style={{ padding: '20px', maxWidth: '1000px', margin: '0 auto' }}>
+            {/* Back Navigation */}
             {fromWatchlist ? (
                 <Link
                     to="/watchlist"
@@ -124,6 +172,7 @@ const MovieDetails = () => {
                 </Link>
             )}
 
+            {/* Movie Details Layout */}
             <div style={{ display: 'flex', gap: '40px', marginTop: '20px' }}>
                 {/* Poster Column */}
                 <div style={{ flex: '0 0 300px' }}>
@@ -176,13 +225,14 @@ const MovieDetails = () => {
                     <p><strong>Director:</strong> {movie.Director}</p>
                     <p><strong>Actors:</strong> {movie.Actors}</p>
                     <p><strong>Runtime:</strong> {movie.Runtime}</p>
-                    <p><strong>IMDB Rating:</strong> ⭐ {movie.imdbRating}</p>
+                    <p><strong>IMDB Rating:</strong> {movie.imdbRating}</p>
 
                     <div style={{ marginTop: '20px' }}>
                         <h3>Plot</h3>
                         <p style={{ lineHeight: '1.6' }}>{movie.Plot}</p>
                     </div>
 
+                    {/* Action Buttons */}
                     <div style={{ display: 'flex', gap: '12px', marginTop: '20px', flexWrap: 'wrap' }}>
                         {fromWatchlist ? (
                             // Coming from Watchlist - Show Remove button + Back to Watchlist
@@ -200,7 +250,7 @@ const MovieDetails = () => {
                                         cursor: isRemoving ? 'default' : 'pointer',
                                     }}
                                 >
-                                    {isRemoving ? 'Removing...' : '🗑️ Remove from Watchlist'}
+                                    {isRemoving ? 'Removing...' : 'Remove from Watchlist'}
                                 </button>
                                 <Link to="/watchlist" style={{ textDecoration: 'none' }}>
                                     <button
@@ -234,7 +284,7 @@ const MovieDetails = () => {
                                         cursor: addedToWatchlist ? 'default' : 'pointer',
                                     }}
                                 >
-                                    {isAdding ? 'Adding...' : addedToWatchlist ? '✅ In Watchlist' : 'add to watchlist'}
+                                    {isAdding ? 'Adding...' : addedToWatchlist ? 'In Watchlist' : 'add to watchlist'}
                                 </button>
                                 <Link
                                     to={location.state?.fromSearch ? `/?search=${encodeURIComponent(location.state.fromSearch)}` : '/'}

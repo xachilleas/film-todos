@@ -1,3 +1,18 @@
+/**
+ * Watchlist Page Component
+ * Displays the user's watchlist with pagination and removal functionality.
+ *
+ * @module Watchlist
+ * @requires react
+ * @requires react-router-dom
+ * @requires ../contexts/AuthContext
+ * @requires ../services/watchlistService
+ * @requires ../types
+ * @requires ../components/Toast
+ * @requires react-icons/fi
+ * @requires react-icons/md
+ */
+
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -7,12 +22,25 @@ import Toast from "../components/Toast.tsx";
 import { FiTrash2 } from 'react-icons/fi';
 import { MdNoPhotography } from 'react-icons/md';
 
-
-
+/**
+ * Watchlist Page Component
+ *
+ * Features:
+ * - Displays user's watchlist with posters and details
+ * - Pagination with previous/next navigation
+ * - Remove movies with confirmation dialog
+ * - Toast notifications for success/error
+ * - Empty state with link to search
+ * - Welcome message for authenticated user
+ * - Loading state during data fetch
+ *
+ * @returns {JSX.Element} Rendered watchlist page
+ */
 const Watchlist = () => {
+    // State management
     const [watchlist, setWatchlist] = useState<WatchlistItem[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [currentPage, setCurrentPage] = useState(1);
+    const [loading, setLoading] = useState<boolean>(true);
+    const [currentPage, setCurrentPage] = useState<number>(1);
     const [nextPage, setNextPage] = useState<number | null>(null);
     const [prevPage, setPrevPage] = useState<number | null>(null);
     const [removingId, setRemovingId] = useState<string | null>(null);
@@ -21,7 +49,12 @@ const Watchlist = () => {
 
     const { user } = useAuth();
 
-    const fetchWatchlist = async (page: number = 1) => {
+    /**
+     * Fetches the user's watchlist with pagination
+     *
+     * @param {number} page - Page number to fetch (default: 1)
+     */
+    const fetchWatchlist = async (page: number = 1): Promise<void> => {
         try {
             setLoading(true);
             const response = await watchlistService.getWatchlist(page);
@@ -37,7 +70,13 @@ const Watchlist = () => {
         }
     };
 
-    const handleRemove = async (imdbId: string) => {
+    /**
+     * Handles removing a movie from the watchlist
+     * Shows confirmation dialog before removal
+     *
+     * @param {string} imdbId - IMDb ID of the movie to remove
+     */
+    const handleRemove = async (imdbId: string): Promise<void> => {
         if (!window.confirm('Remove this movie from your watchlist?')) {
             return;
         }
@@ -46,19 +85,26 @@ const Watchlist = () => {
             setRemovingId(imdbId);
             await watchlistService.removeFromWatchlist(imdbId);
             setToast({ message: 'Movie removed from watchlist!', type: 'success' });
+
+            // Refresh the watchlist after removal
             await fetchWatchlist(currentPage);
+
+            // If watchlist becomes empty on a page > 1, go back one page
             const freshResponse = await watchlistService.getWatchlist(currentPage);
             if (freshResponse.data.length === 0 && currentPage > 1) {
                 setCurrentPage(currentPage - 1);
             }
         } catch (err) {
-            alert('Failed to remove movie. Please try again.');
+            setToast({ message: 'Failed to remove movie. Please try again.', type: 'error' });
             console.error('Error removing movie:', err);
         } finally {
             setRemovingId(null);
         }
     };
 
+    /**
+     * Fetch watchlist when page changes
+     */
     useEffect(() => {
         fetchWatchlist(currentPage);
     }, [currentPage]);
@@ -79,7 +125,7 @@ const Watchlist = () => {
                 <h1>my watchlist</h1>
                 <p>Your watchlist is empty.</p>
                 <Link to="/" className="search-link">
-                    Search for movies to add ➜
+                    Search for movies to add &rarr;
                 </Link>
             </div>
         );
@@ -170,7 +216,7 @@ const Watchlist = () => {
                                         color: '#999',
                                         transition: 'color 0.2s ease'
                                     }}
-                                    onMouseEnter={(e) => e.currentTarget.style.color = '#8B0000'}
+                                    onMouseEnter={(e) => e.currentTarget.style.color = '#800000'}
                                     onMouseLeave={(e) => e.currentTarget.style.color = '#999'}
                                 />
                             )}
@@ -179,6 +225,7 @@ const Watchlist = () => {
                 ))}
             </div>
 
+            {/* Pagination Controls */}
             <div className="pagination">
                 <button
                     onClick={() => setCurrentPage(prev => prev - 1)}
@@ -186,19 +233,20 @@ const Watchlist = () => {
                     className="pagination-button"
                     style={{ fontFamily: 'Kreon, serif' }}
                 >
-                    ← previous
+                    &larr; previous
                 </button>
                 <span className="page-info">page {currentPage}</span>
                 <button
                     onClick={() => setCurrentPage(prev => prev + 1)}
                     disabled={nextPage === null}
                     className="pagination-button"
-                    style={{ fontFamily: 'Kreon, serif'}}
+                    style={{ fontFamily: 'Kreon, serif' }}
                 >
-                    next →
+                    next &rarr;
                 </button>
             </div>
 
+            {/* Toast Notification */}
             {toast && (
                 <Toast
                     message={toast.message}

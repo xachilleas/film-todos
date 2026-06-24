@@ -1,3 +1,16 @@
+/**
+ * Home Page Component
+ * Main page for searching and displaying movies.
+ * Features search functionality, movie grid display, and poster fallback handling.
+ *
+ * @module Home
+ * @requires react
+ * @requires react-router-dom
+ * @requires ../contexts/AuthContext
+ * @requires ../services/movieService
+ * @requires react-icons/md
+ */
+
 import { useState, useEffect } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
@@ -5,19 +18,40 @@ import { movieService } from '../services/movieService';
 import type { Movie } from '../services/movieService';
 import { MdNoPhotography } from 'react-icons/md';
 
-
+/**
+ * Home Page Component
+ *
+ * Features:
+ * - Movie search with enter key support
+ * - Grid display of movie posters
+ * - Poster fallback with Material Design icon
+ * - Loading state during search
+ * - Error handling for failed searches
+ * - Welcome message for authenticated users
+ * - URL search parameter synchronization
+ * - Hover effect on movie cards
+ *
+ * @returns {JSX.Element} Rendered home page
+ */
 const Home = () => {
-    const [searchTerm, setSearchTerm] = useState('');
-    const [loading, setLoading] = useState(false);
+    // State management
+    const [searchTerm, setSearchTerm] = useState<string>('');
+    const [loading, setLoading] = useState<boolean>(false);
     const [movies, setMovies] = useState<Movie[]>([]);
-    const [error, setError] = useState('');
+    const [error, setError] = useState<string>('');
     const [failedImages, setFailedImages] = useState<Set<string>>(new Set());
 
+    // Hooks
     const { user } = useAuth();
     const location = useLocation();
     const navigate = useNavigate();
 
-    const performSearch = async (term: string) => {
+    /**
+     * Performs movie search using the movie service
+     *
+     * @param {string} term - Search term to look for
+     */
+    const performSearch = async (term: string): Promise<void> => {
         if (!term.trim()) {
             setError('Please enter a movie title');
             return;
@@ -42,7 +76,13 @@ const Home = () => {
         }
     };
 
+    /**
+     * Handle URL search parameters and clear search state
+     * - Clears search when navigating from navbar
+     * - Performs search when URL has 'search' parameter
+     */
     useEffect(() => {
+        // Clear search state when requested (from navbar navigation)
         if (location.state?.clearSearch) {
             setSearchTerm('');
             setMovies([]);
@@ -52,6 +92,7 @@ const Home = () => {
             return;
         }
 
+        // Check for search query in URL parameters
         const params = new URLSearchParams(location.search);
         const searchQuery = params.get('search');
 
@@ -61,23 +102,32 @@ const Home = () => {
         }
     }, [location.search, location.state]);
 
-    const handleSearch = async () => {
+    /**
+     * Handle search form submission
+     * Updates URL and performs search
+     */
+    const handleSearch = async (): Promise<void> => {
         if (!searchTerm.trim()) {
             setError('Please enter a movie title');
             return;
         }
 
+        // Update URL with search parameter
         navigate(`/?search=${encodeURIComponent(searchTerm.trim())}`, { replace: true });
         await performSearch(searchTerm.trim());
     };
 
     return (
         <div className="home-container">
+            {/* Page Header */}
             <h2 style={{ fontSize: '20px', fontWeight: '400', color: '#666', marginBottom: '10px' }}>
                 search movies
             </h2>
+
+            {/* Welcome Message for Authenticated Users */}
             {user && <p>welcome, {user.username}!</p>}
 
+            {/* Search Bar */}
             <div style={{
                 display: 'flex',
                 gap: '10px',
@@ -118,8 +168,10 @@ const Home = () => {
                 </button>
             </div>
 
+            {/* Error Display */}
             {error && <p style={{ color: 'red', marginBottom: '10px' }}>{error}</p>}
 
+            {/* Movie Grid */}
             <div style={{
                 display: 'grid',
                 gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))',
@@ -128,6 +180,7 @@ const Home = () => {
                 maxWidth: '1200px'
             }}>
                 {movies.map((movie) => {
+                    // Determine if poster placeholder should be shown
                     const showPlaceholder = !movie.Poster ||
                         movie.Poster === 'N/A' ||
                         movie.Poster === '' ||
@@ -155,6 +208,7 @@ const Home = () => {
                                 onMouseEnter={(e) => e.currentTarget.style.transform = 'scale(1.05)'}
                                 onMouseLeave={(e) => e.currentTarget.style.transform = 'scale(1)'}
                             >
+                                {/* Movie Poster */}
                                 <div style={{
                                     width: '100%',
                                     height: '300px',
@@ -194,6 +248,7 @@ const Home = () => {
                                     )}
                                 </div>
 
+                                {/* Movie Info */}
                                 <div style={{
                                     padding: '10px',
                                     flex: 1,
@@ -210,6 +265,7 @@ const Home = () => {
                 })}
             </div>
 
+            {/* Empty State */}
             {!loading && movies.length === 0 && !error && (
                 <p style={{ textAlign: 'center', color: '#666' }}>search for movies above</p>
             )}

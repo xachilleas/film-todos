@@ -1,30 +1,71 @@
+/**
+ * Login Page Component
+ * Renders the login form for user authentication.
+ * Redirects users to their intended destination after successful login.
+ *
+ * @module Login
+ * @requires react
+ * @requires react-router-dom
+ * @requires ../contexts/AuthContext
+ */
+
 import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
+/**
+ * Login Page Component
+ *
+ * Features:
+ * - Email and password form with validation
+ * - Error handling with user-friendly messages
+ * - Redirect to previous page after login (or home)
+ * - Register link for new users
+ *
+ * @returns {JSX.Element} Rendered login page
+ */
 const Login: React.FC = () => {
-    const [email, setEmail] = useState('');
-    const [password, setPassword] = useState('');
-    const [error, setError] = useState('');
+    // Form state
+    const [email, setEmail] = useState<string>('');
+    const [password, setPassword] = useState<string>('');
+    const [error, setError] = useState<string>('');
+
+    // Hooks
     const { login } = useAuth();
     const navigate = useNavigate();
     const location = useLocation();
 
-    // Get the page they came from (default to home)
+    /**
+     * Get the page the user came from (default to home)
+     * Allows redirect back to original destination after login
+     */
     const from = location.state?.from || '/';
 
-    const handleSubmit = async (e: React.FormEvent) => {
+    /**
+     * Handle form submission
+     * Attempts login and redirects on success
+     * Displays error message on failure
+     *
+     * @param {React.FormEvent} e - Form submission event
+     */
+    const handleSubmit = async (e: React.FormEvent): Promise<void> => {
         e.preventDefault();
         setError('');
+
         try {
             await login(email, password);
-            navigate(from);  // Redirect back to where they came from
+            // Redirect to the page they were trying to access
+            navigate(from);
         } catch (err: any) {
+            // Display user-friendly error message
             setError(err.response?.data?.message || 'Login failed');
         }
     };
 
-    const goToRegister = () => {
+    /**
+     * Navigate to registration page
+     */
+    const goToRegister = (): void => {
         navigate('/register');
     };
 
@@ -34,8 +75,10 @@ const Login: React.FC = () => {
                 <h2 className="auth-title">welcome back</h2>
                 <p className="auth-subtitle">login to your film-todos account</p>
 
+                {/* Display error message if present */}
                 {error && <div className="auth-error">{error}</div>}
 
+                {/* Login Form */}
                 <form onSubmit={handleSubmit} className="auth-form">
                     <div className="form-group">
                         <label htmlFor="email">email</label>
@@ -66,6 +109,7 @@ const Login: React.FC = () => {
                     </button>
                 </form>
 
+                {/* Redirect to Register */}
                 <p className="auth-redirect">
                     don't have an account?{' '}
                     <button

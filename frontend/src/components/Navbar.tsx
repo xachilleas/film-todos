@@ -1,31 +1,64 @@
-// frontend/src/components/Navbar.tsx
+/**
+ * Navbar Component
+ * Main navigation bar for the application.
+ * Displays brand, navigation links, and user authentication status.
+ *
+ * @module Navbar
+ * @requires react-router-dom
+ * @requires ../contexts/AuthContext
+ */
 
+import React from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 
-const Navbar = () => {
+/**
+ * Navbar Component
+ *
+ * Features:
+ * - Brand logo that navigates to home with search reset
+ * - Search button that navigates to home with search reset
+ * - Watchlist link (authenticated users only)
+ * - User display with username/email
+ * - Login/Logout buttons
+ *
+ * @returns {React.ReactElement} Rendered navigation bar
+ */
+const Navbar: React.FC = () => {
     const { user, logout } = useAuth();
     const navigate = useNavigate();
 
-    const handleLogout = () => {
+    /**
+     * Handles user logout
+     * Clears authentication state and redirects to home
+     */
+    const handleLogout = (): void => {
         logout();
+        // Navigate after logout is complete
         setTimeout(() => {
             navigate('/');
         }, 0);
     };
 
-    // --- NEW: Handle going to Home with clear state ---
-    const goToHome = () => {
+    /**
+     * Navigates to home page with search reset flag
+     * This clears any previous search results when clicking the brand or search link
+     */
+    const goToHome = (): void => {
         navigate('/', {
-            state: { clearSearch: true }  // ← Tell Home to clear everything
+            state: { clearSearch: true }
         });
     };
 
     return (
         <nav className="navbar">
             <div className="nav-container-main">
-                {/* Logo/Brand - now uses goToHome */}
-                <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-start' }}>
+                {/* Brand Section - Logo and Tagline */}
+                <div style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'flex-start'
+                }}>
                     <button
                         onClick={goToHome}
                         className="navbar-brand-button"
@@ -50,13 +83,13 @@ const Navbar = () => {
                         letterSpacing: '0.3px',
                         marginTop: '2px'
                     }}>
-        movie search engine &amp; personal watchlist service
-    </span>
+                        movie search engine &amp; personal watchlist service
+                    </span>
                 </div>
 
-                {/* Navigation Links */}
+                {/* Navigation Links Section */}
                 <div className="navbar-links">
-                    {/* Search link - now uses goToHome */}
+                    {/* Search Button - Navigates to home with search reset */}
                     <button
                         onClick={goToHome}
                         className="nav-link-button"
@@ -76,16 +109,31 @@ const Navbar = () => {
                         search
                     </button>
 
+                    {/* Authenticated User Links */}
                     {user ? (
                         <>
-                            <Link to="/watchlist" className="nav-link">my watchlist</Link>
-                            <span className="navbar-user">🔒{user.username || user.email}</span>
-                            <button onClick={handleLogout} className="logout-button" style={{ fontFamily: 'Kreon, serif', backgroundColor: '#800000' }}>
+                            <Link to="/watchlist" className="nav-link">
+                                my watchlist
+                            </Link>
+                            <span className="navbar-user">
+                                {user.username || user.email}
+                            </span>
+                            <button
+                                onClick={handleLogout}
+                                className="logout-button"
+                                style={{
+                                    fontFamily: 'Kreon, serif',
+                                    backgroundColor: '#800000'
+                                }}
+                            >
                                 logout
                             </button>
                         </>
                     ) : (
-                        <Link to="/login" className="nav-link">login</Link>
+                        // Unauthenticated User Links
+                        <Link to="/login" className="nav-link">
+                            login
+                        </Link>
                     )}
                 </div>
             </div>
