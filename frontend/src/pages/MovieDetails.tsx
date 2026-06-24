@@ -219,8 +219,16 @@ const MovieDetails = () => {
 
                 {/* Details Column */}
                 <div style={{ flex: 1 }}>
-                    <h1>{movie.Title}</h1>
-                    <p><strong>Year:</strong> {movie.Year}</p>
+                    <h1 style={{
+                        fontSize: '28px',
+                        lineHeight: '1.3',
+                        marginBottom: '16px',
+                        wordWrap: 'break-word',
+                        overflowWrap: 'break-word',
+                        maxWidth: '100%'
+                    }}>
+                        {movie.Title}
+                    </h1>                    <p><strong>Year:</strong> {movie.Year}</p>
                     <p><strong>Genre:</strong> {movie.Genre}</p>
                     <p><strong>Director:</strong> {movie.Director}</p>
                     <p><strong>Actors:</strong> {movie.Actors}</p>
