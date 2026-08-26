@@ -35,6 +35,7 @@ export interface WatchlistItem {
     Runtime?: string;
     imdbRating?: string;
     Plot?: string;
+    seen?: boolean;
 }
 
 /**
@@ -83,12 +84,13 @@ export class WatchlistRepository {
             .input('Runtime', item.Runtime)
             .input('imdbRating', item.imdbRating)
             .input('Plot', item.Plot)
+            .input('seen', item.seen)  // ← Add this
             .query(`
-                INSERT INTO WatchlistItems (user_id, imdb_id, title, year, poster, Genre, Director, Actors, Runtime, imdbRating, Plot)
+                INSERT INTO WatchlistItems (user_id, imdb_id, title, year, poster, Genre, Director, Actors, Runtime, imdbRating, Plot, seen)
                     OUTPUT INSERTED.id, INSERTED.user_id, INSERTED.imdb_id, INSERTED.title, 
                INSERTED.year, INSERTED.poster, INSERTED.added_at,
-               INSERTED.Genre, INSERTED.Director, INSERTED.Actors, INSERTED.Runtime, INSERTED.imdbRating, INSERTED.Plot
-                VALUES (@user_id, @imdb_id, @title, @year, @poster, @Genre, @Director, @Actors, @Runtime, @imdbRating, @Plot)
+               INSERTED.Genre, INSERTED.Director, INSERTED.Actors, INSERTED.Runtime, INSERTED.imdbRating, INSERTED.Plot, INSERTED.seen
+                VALUES (@user_id, @imdb_id, @title, @year, @poster, @Genre, @Director, @Actors, @Runtime, @imdbRating, @Plot, @seen)
             `);
 
         return result.recordset[0];
@@ -115,22 +117,37 @@ export class WatchlistRepository {
     async findByUserId(
         userId: number,
         limit?: number,
-        offset?: number
+        offset?: number,
+        filter?: 'all' | 'seen' | 'unseen'
     ): Promise<{ items: WatchlistItem[]; total: number }> {
         const pool = getPool();
 
-        // Get total count of watchlist items for this user
-        const countResult = await pool.request()
-            .input('user_id', userId)
-            .query('SELECT COUNT(*) as total FROM WatchlistItems WHERE user_id = @user_id');
+// Get total count of watchlist items for this user
+        let countQuery = 'SELECT COUNT(*) as total FROM WatchlistItems WHERE user_id = @user_id';
+        const countRequest = pool.request().input('user_id', userId);
 
+        if (filter && filter !== 'all') {
+            const seenValue = filter === 'seen' ? 1 : 0;
+            countQuery += ' AND seen = @seen';
+            countRequest.input('seen', seenValue);
+        }
+
+        const countResult = await countRequest.query(countQuery);
         const total = countResult.recordset[0].total;
 
-        // Build the main query to retrieve items
-        let query = 'SELECT * FROM WatchlistItems WHERE user_id = @user_id ORDER BY added_at DESC';
+// Build the main query to retrieve items
+        let query = 'SELECT * FROM WatchlistItems WHERE user_id = @user_id';
         const request = pool.request().input('user_id', userId);
 
-        // Apply pagination if both limit and offset are provided
+        if (filter && filter !== 'all') {
+            const seenValue = filter === 'seen' ? 1 : 0;
+            query += ' AND seen = @seen';
+            request.input('seen', seenValue);
+        }
+
+        query += ' ORDER BY added_at DESC';
+
+// Apply pagination if both limit and offset are provided
         if (limit !== undefined && offset !== undefined) {
             query += ' OFFSET @offset ROWS FETCH NEXT @limit ROWS ONLY';
             request.input('offset', offset);
@@ -198,5 +215,38 @@ export class WatchlistRepository {
             .query('SELECT COUNT(*) as count FROM WatchlistItems WHERE user_id = @user_id AND imdb_id = @imdb_id');
 
         return result.recordset[0].count > 0;
+    }
+
+    /**
+     * Toggles the 'seen' status of a movie in the user's watchlist
+     *
+     * @param {number} userId - ID of the user
+     * @param {string} imdbId - IMDb ID of the movie
+     * @returns {Promise<boolean>} The new seen status (true = seen, false = unseen)
+     */
+    async toggleSeen(userId: number, imdbId: string): Promise<boolean> {
+        const pool = getPool();
+
+        // Get current seen status
+        const currentResult = await pool.request()
+            .input('user_id', userId)
+            .input('imdb_id', imdbId)
+            .query('SELECT seen FROM WatchlistItems WHERE user_id = @user_id AND imdb_id = @imdb_id');
+
+        if (currentResult.recordset.length === 0) {
+            throw new Error('Movie not found in watchlist');
+        }
+
+        const currentSeen = currentResult.recordset[0].seen;
+        const newSeen = !currentSeen;
+
+        // Update seen status
+        await pool.request()
+            .input('user_id', userId)
+            .input('imdb_id', imdbId)
+            .input('seen', newSeen)
+            .query('UPDATE WatchlistItems SET seen = @seen WHERE user_id = @user_id AND imdb_id = @imdb_id');
+
+        return newSeen;
     }
 }

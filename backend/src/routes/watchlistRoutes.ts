@@ -278,4 +278,6 @@ router.delete(
     watchlistController.removeFromWatchlist
 );
 
+router.patch('/:imdbId/seen', authMiddleware, watchlistController.toggleSeen.bind(watchlistController));
+
 export default router;

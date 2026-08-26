@@ -58,12 +58,17 @@ export class WatchlistService {
      * console.log(result.data); // Array of watchlist items
      * console.log(result.pagination.totalPages); // 5
      */
-    async getUserWatchlist(userId: number, page: number = 1, limit: number = 10) {
+    async getUserWatchlist(
+        userId: number,
+        page: number = 1,
+        limit: number = 10,
+        filter: 'all' | 'seen' | 'unseen' = 'all'
+    ) {
         // Calculate offset for database pagination
         const offset = (page - 1) * limit;
 
         // Fetch data from repository
-        const result = await this.watchlistRepository.findByUserId(userId, limit, offset);
+        const result = await this.watchlistRepository.findByUserId(userId, limit, offset, filter);
 
         // Calculate pagination metadata
         const total = result.total;
@@ -133,11 +138,22 @@ export class WatchlistService {
             Actors: movieData.Actors || 'N/A',
             Runtime: movieData.Runtime || 'N/A',
             imdbRating: movieData.imdbRating || 'N/A',
-            Plot: movieData.Plot || 'No plot available'
+            Plot: movieData.Plot || 'No plot available',
+            seen: false
         };
 
         // Save the movie to the user's watchlist in the database
         return await this.watchlistRepository.save(movieToSave);
+    }
+    /**
+     * Toggles the 'seen' status of a movie in the user's watchlist
+     *
+     * @param {number} userId - ID of the user
+     * @param {string} imdbId - IMDb ID of the movie
+     * @returns {Promise<boolean>} The new seen status
+     */
+    async toggleSeen(userId: number, imdbId: string): Promise<boolean> {
+        return await this.watchlistRepository.toggleSeen(userId, imdbId);
     }
 }
 
