@@ -21,6 +21,7 @@ import type { WatchlistItem } from '../types';
 import Toast from "../components/Toast.tsx";
 import { FiTrash2 } from 'react-icons/fi';
 import { MdNoPhotography } from 'react-icons/md';
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
 
 /**
  * Watchlist Page Component
@@ -46,6 +47,10 @@ const Watchlist = () => {
     const [removingId, setRemovingId] = useState<string | null>(null);
     const [totalMovies, setTotalMovies] = useState<number>(0);
     const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
+    const [togglingId, setTogglingId] = useState<string | null>(null);
+    const [filter, setFilter] = useState<'all' | 'seen' | 'unseen'>('all');
+
+
 
     const { user } = useAuth();
 
@@ -57,7 +62,7 @@ const Watchlist = () => {
     const fetchWatchlist = async (page: number = 1): Promise<void> => {
         try {
             setLoading(true);
-            const response = await watchlistService.getWatchlist(page);
+            const response = await watchlistService.getWatchlist(page, filter); // filter from state
             setWatchlist(response.data);
             setCurrentPage(response.pagination.currentPage);
             setNextPage(response.pagination.nextPage);
@@ -103,11 +108,28 @@ const Watchlist = () => {
     };
 
     /**
+     * Toggle the seen status of a movie
+     */
+    const handleToggleSeen = async (imdbId: string): Promise<void> => {
+        try {
+            setTogglingId(imdbId);
+            await watchlistService.toggleSeen(imdbId);
+            // Refresh the watchlist to show updated status
+            await fetchWatchlist(currentPage);
+        } catch (err) {
+            setToast({ message: 'Failed to update status. Please try again.', type: 'error' });
+            console.error('Error toggling seen:', err);
+        } finally {
+            setTogglingId(null);
+        }
+    };
+
+    /**
      * Fetch watchlist when page changes
      */
     useEffect(() => {
         fetchWatchlist(currentPage);
-    }, [currentPage]);
+    }, [currentPage, filter]);
 
     // Loading state
     if (loading && watchlist.length === 0) {
@@ -137,6 +159,60 @@ const Watchlist = () => {
             <h1>my watchlist ({totalMovies} movies)</h1>
             {user && <p>welcome, {user.username || user.email}!</p>}
 
+            {/* Filter Buttons - ADD THIS BLOCK */}
+            <div className="filter-buttons" style={{ display: 'flex', gap: '10px', marginTop: '10px', marginBottom: '20px' }}>
+                <button
+                    onClick={() => {
+                        setFilter('all');
+                        setCurrentPage(1);
+                    }}
+                    style={{
+                        padding: '8px 16px',
+                        backgroundColor: filter === 'all' ? '#008080' : '#f0f0f0',
+                        color: filter === 'all' ? 'white' : '#333',
+                        border: 'none',
+                        borderRadius: '4px',
+                        cursor: 'pointer',
+                        fontFamily: 'Kreon, serif'
+                    }}
+                >
+                    All
+                </button>
+                <button
+                    onClick={() => {
+                        setFilter('unseen');
+                    setCurrentPage(1);
+                    }}
+                    style={{
+                        padding: '8px 16px',
+                        backgroundColor: filter === 'unseen' ? '#008080' : '#f0f0f0',
+                        color: filter === 'unseen' ? 'white' : '#333',
+                        border: 'none',
+                        borderRadius: '4px',
+                        cursor: 'pointer',
+                        fontFamily: 'Kreon, serif'
+                    }}
+                >
+                    👁️ Unseen
+                </button>
+                <button
+                    onClick={() => {
+                        setFilter('seen');
+                        setCurrentPage(1);
+                    }}
+                    style={{
+                        padding: '8px 16px',
+                        backgroundColor: filter === 'seen' ? '#008080' : '#f0f0f0',
+                        color: filter === 'seen' ? 'white' : '#333',
+                        border: 'none',
+                        borderRadius: '4px',
+                        cursor: 'pointer',
+                        fontFamily: 'Kreon, serif'
+                    }}
+                >
+                    👁️ Seen
+                </button>
+            </div>
             <div className="watchlist">
                 {watchlist.map((item) => (
                     <div className="watchlist-row" key={item.imdb_id}>
@@ -190,6 +266,43 @@ const Watchlist = () => {
                             </Link>
                             <span className="movie-year">{item.year}</span>
                         </div>
+
+                        {/* Seen/Unseen Toggle Button */}
+                        <button
+                            onClick={() => handleToggleSeen(item.imdb_id)}
+                            disabled={togglingId === item.imdb_id}
+                            className="seen-toggle-button"
+                            title={item.seen ? 'Mark as unseen' : 'Mark as seen'}
+                            style={{
+                                background: 'none',
+                                border: 'none',
+                                cursor: 'pointer',
+                                padding: '8px',
+                                display: 'flex',
+                                alignItems: 'center',
+                                justifyContent: 'center'
+                            }}
+                        >
+                            {togglingId === item.imdb_id ? (
+                                <span style={{ fontSize: '14px', color: '#999' }}>...</span>
+                            ) : item.seen ? (
+                                <FaEye
+                                    size={20}
+                                    style={{
+                                        color: '#008080',
+                                        transition: 'color 0.2s ease'
+                                    }}
+                                />
+                            ) : (
+                                <FaEyeSlash
+                                    size={20}
+                                    style={{
+                                        color: '#999',
+                                        transition: 'color 0.2s ease'
+                                    }}
+                                />
+                            )}
+                        </button>
 
                         {/* Remove Button - Trash Icon */}
                         <button

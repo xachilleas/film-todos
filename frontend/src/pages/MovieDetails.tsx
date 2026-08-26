@@ -19,6 +19,10 @@ import type { MovieDetail } from '../services/movieService';
 import { watchlistService } from '../services/watchlistService';
 import { useAuth } from '../contexts/AuthContext';
 import { MdNoPhotography } from 'react-icons/md';
+import { FaEye, FaEyeSlash } from 'react-icons/fa';
+import Toast from '../components/Toast';
+
+
 
 /**
  * Movie Details Page Component
@@ -50,6 +54,9 @@ const MovieDetails = () => {
     const [isAdding, setIsAdding] = useState<boolean>(false);
     const [isRemoving, setIsRemoving] = useState<boolean>(false);
     const [addedToWatchlist, setAddedToWatchlist] = useState<boolean>(false);
+    const [seenStatus, setSeenStatus] = useState<boolean>(false);
+    const [isTogglingSeen, setIsTogglingSeen] = useState<boolean>(false);
+    const [toast, setToast] = useState<{ message: string; type: 'success' | 'error' | 'info' } | null>(null);
 
     // Check if user came from watchlist (for back navigation)
     const fromWatchlist = location.state?.fromWatchlist || false;
@@ -124,6 +131,25 @@ const MovieDetails = () => {
      * Remove movie from user's watchlist
      * Shows confirmation dialog before removal
      */
+
+    const handleToggleSeen = async (): Promise<void> => {
+        if (!user) {
+            navigate('/login', { state: { from: `/movie/${id}` } });
+            return;
+        }
+
+        setIsTogglingSeen(true);
+        try {
+            const result = await watchlistService.toggleSeen(id!);
+            setSeenStatus(result.seen);
+            setToast({ message: `Movie marked as ${result.seen ? 'seen' : 'unseen'}`, type: 'success' });
+        } catch (error: any) {
+            alert('Failed to update status. Please try again.');
+        } finally {
+            setIsTogglingSeen(false);
+        }
+    };
+
     const handleRemoveFromWatchlist = async (): Promise<void> => {
         if (!user) {
             navigate('/login', { state: { from: `/movie/${id}` } });
@@ -264,8 +290,31 @@ const MovieDetails = () => {
 
                     {/* Action Buttons */}
                     <div style={{ display: 'flex', gap: '12px', marginTop: '20px', flexWrap: 'wrap' }}>
+                        {/* Seen/Unseen Toggle Button - Only show when coming from watchlist and user is logged in */}
+                        {user && fromWatchlist && (
+                            <button
+                                onClick={handleToggleSeen}
+                                disabled={isTogglingSeen}
+                                style={{
+                                    padding: '12px 24px',
+                                    backgroundColor: seenStatus ? '#008080' : '#6c757d',
+                                    color: 'white',
+                                    border: 'none',
+                                    borderRadius: '4px',
+                                    fontSize: '16px',
+                                    cursor: isTogglingSeen ? 'default' : 'pointer',
+                                    display: 'flex',
+                                    alignItems: 'center',
+                                    gap: '8px'
+                                }}
+                            >
+                                {isTogglingSeen ? 'Updating...' : seenStatus ? <FaEye size={20} /> : <FaEyeSlash size={20} />}
+                                <span>{seenStatus ? 'Seen' : 'Mark as Seen'}</span>
+                            </button>
+                        )}
+
                         {fromWatchlist ? (
-                            // Coming from Watchlist - Show Back button + Remove button (swapped)
+                            // Coming from Watchlist - Show Back button + Remove button
                             <>
                                 <Link to="/watchlist" style={{ textDecoration: 'none' }}>
                                     <button
@@ -299,7 +348,7 @@ const MovieDetails = () => {
                                 </button>
                             </>
                         ) : (
-                            // Coming from Search - Show Back button + Add button (swapped)
+                            // Coming from Search - Show Back button + Add button
                             <>
                                 <Link
                                     to={location.state?.fromSearch ? `/?search=${encodeURIComponent(location.state.fromSearch)}` : '/'}
@@ -339,6 +388,16 @@ const MovieDetails = () => {
                     </div>
                 </div>
             </div>
+
+            {/* Toast Notification */}
+            {toast && (
+                <Toast
+                    message={toast.message}
+                    type={toast.type}
+                    duration={1500}
+                    onClose={() => setToast(null)}
+                />
+            )}
         </div>
     );
 };

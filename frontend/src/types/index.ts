@@ -148,7 +148,7 @@ export interface WatchlistItem {
     /** Timestamp when added to watchlist */
     added_at: string;
     /** Whether the movie has been watched */
-    watched: boolean;
+    seen: boolean;
 }
 
 /**

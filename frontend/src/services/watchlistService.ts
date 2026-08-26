@@ -34,10 +34,13 @@ export const watchlistService = {
      * console.log(data); // Array of watchlist items
      * console.log(pagination.total); // Total number of items
      */
-    getWatchlist: async (page: number = 1, limit: number = 10): Promise<WatchlistResponse> => {
-        const response = await api.get('/watchlist', {
-            params: { page, limit }
-        });
+    getWatchlist: async (page: number = 1, filter: 'all' | 'seen' | 'unseen' = 'all'): Promise<WatchlistResponse> => {
+        const params = new URLSearchParams();
+        params.append('page', page.toString());
+        if (filter !== 'all') {
+            params.append('filter', filter);
+        }
+        const response = await api.get(`/watchlist?${params.toString()}`);
         return response.data;
     },
 
@@ -71,5 +74,16 @@ export const watchlistService = {
     removeFromWatchlist: async (imdbId: string): Promise<{ message: string }> => {
         const response = await api.delete(`/watchlist/${imdbId}`);
         return response.data;
+    },
+    /**
+     * Toggle the seen status of a movie in the watchlist
+     *
+     * @param {string} imdbId - IMDb ID of the movie
+     * @returns {Promise<{ seen: boolean }>} The new seen status
+     */
+    toggleSeen: async (imdbId: string): Promise<{ seen: boolean }> => {
+        const response = await api.patch(`/watchlist/${imdbId}/seen`);
+        return response.data.data;
     }
+
 };
