@@ -127,7 +127,13 @@ export class WatchlistService {
             imdb_id: movieData.imdbID,
             title: movieData.Title,
             year: movieData.Year,
-            poster: movieData.Poster
+            poster: movieData.Poster,
+            Genre: movieData.Genre || 'N/A',
+            Director: movieData.Director || 'N/A',
+            Actors: movieData.Actors || 'N/A',
+            Runtime: movieData.Runtime || 'N/A',
+            imdbRating: movieData.imdbRating || 'N/A',
+            Plot: movieData.Plot || 'No plot available'
         };
 
         // Save the movie to the user's watchlist in the database

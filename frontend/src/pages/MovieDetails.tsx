@@ -61,6 +61,22 @@ const MovieDetails = () => {
         const fetchMovieDetails = async (): Promise<void> => {
             if (!id) return;
 
+            // Check if movie data was passed from watchlist
+            const movieFromWatchlist = location.state?.movie;
+
+            console.log('🔍 Full movie object:', movieFromWatchlist);
+            console.log('🔍 Object keys:', Object.keys(movieFromWatchlist || {}));
+            console.log('🔍 poster field:', movieFromWatchlist?.poster);
+            console.log('🔍 Poster field (capital P):', movieFromWatchlist?.Poster);
+
+            if (movieFromWatchlist) {
+                // Use the data from watchlist - no API call needed!
+                setMovie(movieFromWatchlist);
+                setLoading(false);
+                return;
+            }
+
+            // Otherwise fetch from API (for search results)
             setLoading(true);
             setError('');
             setImageFailed(false);
@@ -76,7 +92,7 @@ const MovieDetails = () => {
         };
 
         fetchMovieDetails();
-    }, [id]);
+    }, [id, location.state?.movie]);
 
     /**
      * Add movie to user's watchlist
@@ -148,9 +164,10 @@ const MovieDetails = () => {
     }
 
     // Determine if poster placeholder should be shown
-    const showPlaceholder = !movie.Poster ||
-        movie.Poster === 'N/A' ||
-        movie.Poster === '' ||
+    const posterUrl = (movie as any).poster || movie.Poster;
+    const showPlaceholder = !posterUrl ||
+        posterUrl === 'N/A' ||
+        posterUrl === '' ||
         imageFailed;
 
     return (
@@ -188,7 +205,7 @@ const MovieDetails = () => {
                     }}>
                         {!showPlaceholder ? (
                             <img
-                                src={movie.Poster}
+                                src={movie.poster || movie.Poster}
                                 alt={movie.Title}
                                 style={{
                                     width: '100%',
@@ -197,7 +214,10 @@ const MovieDetails = () => {
                                     display: 'block',
                                     borderRadius: '8px',
                                 }}
-                                onError={() => setImageFailed(true)}
+                                onError={() => {
+                                    console.log('❌ Image failed to load:', movie.Poster);
+                                    setImageFailed(true);
+                                }}
                             />
                         ) : (
                             <div style={{

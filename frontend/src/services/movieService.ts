@@ -47,6 +47,7 @@ export interface MovieDetail extends Movie {
     Runtime: string;
     /** IMDb rating (e.g., '8.8') */
     imdbRating: string;
+    poster?: string;
 }
 
 // ============================================================================

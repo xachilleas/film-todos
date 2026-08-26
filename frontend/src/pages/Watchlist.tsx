@@ -183,7 +183,7 @@ const Watchlist = () => {
                         <div className="watchlist-info">
                             <Link
                                 to={`/movie/${item.imdb_id}`}
-                                state={{ fromWatchlist: true }}
+                                state={{ fromWatchlist: true, movie: item }}
                                 className="movie-title"
                             >
                                 {item.title}

@@ -136,7 +136,7 @@ export interface WatchlistItem {
     /** Unique watchlist entry identifier */
     id: number;
     /** ID of the user who owns this watchlist item */
-    userId: number;
+    user_id: number;
     /** IMDb identifier of the movie */
     imdb_id: string;
     /** Movie title */
@@ -146,7 +146,7 @@ export interface WatchlistItem {
     /** URL to movie poster image */
     poster: string;
     /** Timestamp when added to watchlist */
-    addedAt: string;
+    added_at: string;
     /** Whether the movie has been watched */
     watched: boolean;
 }

@@ -29,6 +29,12 @@ export interface WatchlistItem {
     year: string;
     poster: string;
     added_at?: Date;
+    Genre?: string;
+    Director?: string;
+    Actors?: string;
+    Runtime?: string;
+    imdbRating?: string;
+    Plot?: string;
 }
 
 /**
@@ -71,11 +77,18 @@ export class WatchlistRepository {
             .input('title', item.title)
             .input('year', item.year)
             .input('poster', item.poster)
+            .input('Genre', item.Genre)
+            .input('Director', item.Director)
+            .input('Actors', item.Actors)
+            .input('Runtime', item.Runtime)
+            .input('imdbRating', item.imdbRating)
+            .input('Plot', item.Plot)
             .query(`
-                INSERT INTO WatchlistItems (user_id, imdb_id, title, year, poster)
+                INSERT INTO WatchlistItems (user_id, imdb_id, title, year, poster, Genre, Director, Actors, Runtime, imdbRating, Plot)
                     OUTPUT INSERTED.id, INSERTED.user_id, INSERTED.imdb_id, INSERTED.title, 
-                       INSERTED.year, INSERTED.poster, INSERTED.added_at
-                VALUES (@user_id, @imdb_id, @title, @year, @poster)
+               INSERTED.year, INSERTED.poster, INSERTED.added_at,
+               INSERTED.Genre, INSERTED.Director, INSERTED.Actors, INSERTED.Runtime, INSERTED.imdbRating, INSERTED.Plot
+                VALUES (@user_id, @imdb_id, @title, @year, @poster, @Genre, @Director, @Actors, @Runtime, @imdbRating, @Plot)
             `);
 
         return result.recordset[0];
