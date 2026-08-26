@@ -24,8 +24,11 @@ A full-stack web application where users can search for movies using the OMDb AP
 ## Features
 
 - User Authentication - Register and login with JWT-based authentication
-- Movie Search - Search for movies using the OMDb API
+- Movie Search - Search for movies using the OMDb API with pagination
+- Full Movie Data Storage - All OMDb fields (Genre, Director, Actors, Runtime, imdbRating, Plot) are stored locally when adding to watchlist
 - Watchlist Management - Add/remove movies to/from your personal watchlist
+- Seen/Unseen Tracking - Mark movies as seen or unseen with a simple toggle
+- Filter by Status - Filter your watchlist by All, Seen, or Unseen movies
 - Pagination - Browse search results and watchlist with pagination
 - Responsive Design - Works on desktop and mobile devices
 - API Documentation - Swagger/OpenAPI documentation at /api-docs
@@ -69,7 +72,7 @@ film-todos/
 │ │ ├── middleware/ # Auth, validation, error handling
 │ │ ├── validators/ # Zod schemas
 │ │ ├── utils/ # Helpers (db, AppError)
-│ │ ├── types/ # TypeScript interfaces
+│ │ ├── scripts/ # Database migration scripts
 │ │ └── index.ts # Server entry point
 │ ├── package.json
 │ └── tsconfig.json
@@ -118,7 +121,7 @@ bash
 cd ../frontend
 npm install
 Environment Variables
-Create a .env file in the backend/ directory based on .env.example:
+Create a .env file in the backend/ directory:
 
 env
 # Backend .env
@@ -154,8 +157,20 @@ Install SQL Server locally
 
 Create a database named FilmTodosDB
 
-Run the migration script
+Run the database setup script:
 
+bash
+cd backend
+node src/scripts/create-database.js
+Database Migrations
+After the initial setup, run these migration scripts to add new features:
+
+bash
+# Add full movie data fields (Extension 1)
+node src/scripts/add-movie-columns.js
+
+# Add seen/unseen tracking (Extension 2)
+node src/scripts/add-seen-column.js
 Running the Application
 Start the Backend Server
 bash
@@ -180,9 +195,19 @@ POST	/api/auth/register	Register a new user
 POST	/api/auth/login	Login and get JWT token
 GET	/api/movies/search?title=...	Search movies
 GET	/api/movies/:id	Get movie details
-GET	/api/watchlist	Get user's watchlist
+GET	/api/watchlist?page=1&filter=seen	Get user's watchlist with optional filter
 POST	/api/watchlist	Add movie to watchlist
+PATCH	/api/watchlist/:imdbId/seen	Toggle seen/unseen status
 DELETE	/api/watchlist/:imdbId	Remove from watchlist
+Watchlist Filters
+The watchlist endpoint supports the following filters:
+
+filter=all - Show all movies (default)
+
+filter=seen - Show only seen movies
+
+filter=unseen - Show only unseen movies
+
 Testing
 Run Backend Tests
 bash
@@ -198,6 +223,7 @@ Backend: 37+ unit tests
 - MoviesController: 8 tests
 - OMDbService: 6 tests
 - WatchlistService: 6 tests
+- WatchlistRepository: 9 tests
 Assignment Requirements Checklist
 Requirement	Status
 Domain Model (Users + Watchlist)	Done
@@ -206,9 +232,11 @@ Layered Architecture	Done
 REST API	Done
 Authentication/Authorization (JWT)	Done
 Frontend (React)	Done
-Unit Tests (Jest - 37 tests)	Done
+Unit Tests (Jest - 37+ tests)	Done
 Swagger Documentation	Done
-Docker Setup	Not started
+Full Movie Data Storage (Extension 1)	Done
+Seen/Unseen Tracking (Extension 2)	Done
+Docker Setup	In Progress
 README.md	Done
 Future Improvements
 Add email verification on registration
@@ -223,8 +251,12 @@ Export watchlist to CSV
 
 Mobile app (React Native)
 
+Recommended movies based on watchlist
+
+Collaborative watchlists (shared lists)
+
 License
-This project is created as a final assignment for the Coding Factory program at Athens University of Economics and Business.
+This project is created as a final assignment for the Coding Factory 9 program at Athens University of Economics and Business.
 
 Author
 Achilleas
@@ -234,6 +266,6 @@ GitHub: @xachilleas
 Acknowledgements
 OMDb API for providing movie data
 
-Coding Factory for the curriculum
+Coding Factory 9 for the curriculum
 
 All instructors and mentors
