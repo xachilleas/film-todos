@@ -36,6 +36,12 @@ const config: sql.config = {
     }
 };
 
+console.log('🔍 DB_HOST:', process.env.DB_HOST);
+console.log('🔍 DB_USER:', process.env.DB_USER);
+console.log('🔍 DB_PASSWORD length:', process.env.DB_PASSWORD?.length);
+console.log('🔍 DB_PASSWORD first char:', process.env.DB_PASSWORD?.charAt(0));
+console.log('🔍 DB_PASSWORD last char:', process.env.DB_PASSWORD?.charAt(process.env.DB_PASSWORD.length - 1));
+
 /**
  * Singleton connection pool instance
  * Reused across all database operations for efficiency

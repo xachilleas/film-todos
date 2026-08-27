@@ -51,13 +51,38 @@ app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(specs));
 // ============================================================================
 
 /**
- * Establish database connection on server startup
- * Exits process if connection fails
+ * Connect to database with retry logic
+ * Waits for SQL Server to be ready before giving up
  */
-connectDB().catch(error => {
-    console.error("Failed to connect to database:", error);
+async function connectWithRetry(retries = 10, delay = 3000) {
+    for (let i = 0; i < retries; i++) {
+        try {
+            console.log(`Attempting to connect to database (attempt ${i + 1}/${retries})...`);
+            await connectDB();
+            console.log('Database connected successfully!');
+            return;
+        } catch (error: any) {
+            console.log(`Database connection failed: ${error.message}`);
+            if (i < retries - 1) {
+                console.log(`Retrying in ${delay/1000} seconds...`);
+                await new Promise(resolve => setTimeout(resolve, delay));
+            }
+        }
+    }
+    console.log('All database connection attempts failed. Exiting...');
     process.exit(1);
-});
+}
+
+// Start the server after database is connected
+async function startServer() {
+    await connectWithRetry();
+
+    app.listen(PORT, () => {
+        console.log(`Server running on http://localhost:${PORT}`);
+    });
+}
+
+startServer();
 
 // ============================================================================
 // PUBLIC ROUTES (No authentication required)
@@ -101,7 +126,7 @@ app.get("/api/test-db", async (req, res) => {
             message: "Database connected successfully",
             timestamp: new Date()
         });
-    } catch (error) {
+    } catch (error: any) {
         res.status(500).json({ error: "Database connection failed" });
     }
 });
@@ -147,15 +172,3 @@ app.use((req, res) => {
 
 // Global error handler - catches all application errors
 app.use(errorHandler);
-
-// ============================================================================
-// SERVER STARTUP
-// ============================================================================
-
-/**
- * Start the Express server
- * Listens on configured PORT
- */
-app.listen(PORT, () => {
-    console.log(`Server running on http://localhost:${PORT}`);
-});
