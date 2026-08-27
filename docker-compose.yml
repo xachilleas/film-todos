@@ -1,0 +1,72 @@
+services:
+  # SQL Server Database
+  sqlserver:
+    image: mcr.microsoft.com/mssql/server:2022-latest
+    container_name: film-todos-sqlserver
+    environment:
+      ACCEPT_EULA: "Y"
+      SA_PASSWORD: "AChi1978"
+      MSSQL_PID: "Express"
+    ports:
+      - "50720:1433"
+    volumes:
+      - sqlserver-data:/var/opt/mssql
+    networks:
+      - film-todos-network
+    healthcheck:
+      test: /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P "AChi1978" -C -Q "SELECT 1" || exit 1
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+
+  # Backend API
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: film-todos-backend
+    environment:
+      PORT: 3000
+      DB_HOST: sqlserver
+      DB_PORT: 1433
+      APP_DATABASE: FilmTodosDB
+      DB_USER: sa
+      DB_PASSWORD: "AChi1978"
+      JWT_SECRET: your-super-secret-jwt-key-change-this
+      OMDB_API_KEY: ${OMDB_API_KEY}
+    ports:
+      - "3000:3000"
+    depends_on:
+      sqlserver:
+        condition: service_healthy
+    networks:
+      - film-todos-network
+    volumes:
+      - ./backend:/app
+      - /app/node_modules
+
+  # Frontend
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: film-todos-frontend
+    environment:
+      VITE_API_URL: http://localhost:3000
+    ports:
+      - "5173:5173"
+    depends_on:
+      - backend
+    networks:
+      - film-todos-network
+    volumes:
+      - ./frontend:/app
+      - /app/node_modules
+
+networks:
+  film-todos-network:
+    driver: bridge
+
+volumes:
+  sqlserver-data:
