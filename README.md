@@ -1,7 +1,7 @@
 # Film-Todos
 
-A full-stack web application where users can search for movies using the OMDb API, and authenticated users can save them to a personal watchlist and manage their movie collection.
-**WOMM**
+A full-stack web application where users can search for movies using the OMDb API, and authenticated users can save them to a personal watchlist and manage their movie collection. (WOMM)
+
 ## Table of Contents
 
 - [Features](#features)
@@ -100,9 +100,9 @@ Before you begin, ensure you have the following installed:
 
 1. Clone the repository
 
-```bash
-git clone https://github.com/xachilleas/film-todos.git
-cd film-todos
+   ```bash
+   git clone https://github.com/xachilleas/film-todos.git
+   cd film-todos
 Install backend dependencies
 
 bash
@@ -244,9 +244,9 @@ The Docker Compose setup includes SQL Server and automatically creates the datab
 Option 2: Using Docker Container Only
 bash
 docker run -e "ACCEPT_EULA=Y" \
-  -e "SA_PASSWORD=YourPassword123!" \
-  -p 50720:1433 \
-  -d mcr.microsoft.com/mssql/server:2022-latest
+-e "SA_PASSWORD=YourPassword123!" \
+-p 50720:1433 \
+-d mcr.microsoft.com/mssql/server:2022-latest
 Option 3: Local SQL Server Installation
 Install SQL Server locally, create a database named FilmTodosDB, and run the database setup script:
 
