@@ -1,133 +1,125 @@
-Film-Todos
+# Film-Todos
+
 A full-stack web application where users can search for movies using the OMDb API, and authenticated users can save them to a personal watchlist and manage their movie collection.
+**WOMM**
+## Table of Contents
 
-Table of Contents
-Features
+- [Features](#features)
+- [Tech Stack](#tech-stack)
+- [Project Structure](#project-structure)
+- [Prerequisites](#prerequisites)
+- [Installation](#installation)
+- [Docker Setup](#docker-setup)
+- [Environment Variables](#environment-variables)
+- [Database Setup](#database-setup)
+- [Running the Application](#running-the-application)
+- [API Documentation](#api-documentation)
+- [Testing](#testing)
+- [Assignment Requirements](#assignment-requirements)
+- [Future Improvements](#future-improvements)
+- [License](#license)
+- [Author](#author)
 
-Tech Stack
+## Features
 
-Project Structure
+- User Authentication - Register and login with JWT-based authentication
+- Movie Search - Search for movies using the OMDb API with pagination
+- Full Movie Data Storage - All OMDb fields (Genre, Director, Actors, Runtime, imdbRating, Plot) are stored locally when adding to watchlist
+- Watchlist Management - Add/remove movies to/from your personal watchlist
+- Seen/Unseen Tracking - Mark movies as seen or unseen with a simple toggle
+- Filter by Status - Filter your watchlist by All, Seen, or Unseen movies
+- Pagination - Browse search results and watchlist with pagination
+- Responsive Design - Works on desktop and mobile devices
+- API Documentation - Swagger/OpenAPI documentation at /api-docs
 
-Prerequisites
+## Tech Stack
 
-Installation
+### Backend
 
-Docker Setup
+| Technology | Purpose |
+|------------|---------|
+| Node.js + Express | Runtime and Web Framework |
+| TypeScript | Type Safety |
+| SQL Server + mssql | Database and Driver |
+| JWT + bcrypt | Authentication |
+| Zod | Input Validation |
+| Swagger | API Documentation |
+| Jest | Unit Testing |
 
-Environment Variables
+### Frontend
 
-Database Setup
+| Technology | Purpose |
+|------------|---------|
+| React | UI Framework |
+| TypeScript | Type Safety |
+| React Router | Navigation |
+| Vite | Build Tool |
+| React Icons | Icon Library |
 
-Running the Application
-
-API Documentation
-
-Testing
-
-Assignment Requirements
-
-Future Improvements
-
-License
-
-Author
-
-Features
-User Authentication - Register and login with JWT-based authentication
-
-Movie Search - Search for movies using the OMDb API with pagination
-
-Full Movie Data Storage - All OMDb fields (Genre, Director, Actors, Runtime, imdbRating, Plot) are stored locally when adding to watchlist
-
-Watchlist Management - Add/remove movies to/from your personal watchlist
-
-Seen/Unseen Tracking - Mark movies as seen or unseen with a simple toggle
-
-Filter by Status - Filter your watchlist by All, Seen, or Unseen movies
-
-Pagination - Browse search results and watchlist with pagination
-
-Responsive Design - Works on desktop and mobile devices
-
-API Documentation - Swagger/OpenAPI documentation at /api-docs
-
-Tech Stack
-Backend
-Technology	Purpose
-Node.js + Express	Runtime and Web Framework
-TypeScript	Type Safety
-SQL Server + mssql	Database and Driver
-JWT + bcrypt	Authentication
-Zod	Input Validation
-Swagger	API Documentation
-Jest	Unit Testing
-Frontend
-Technology	Purpose
-React	UI Framework
-TypeScript	Type Safety
-React Router	Navigation
-Vite	Build Tool
-React Icons	Icon Library
-Project Structure
-text
+## Project Structure
 film-todos/
 ├── backend/
-│   ├── src/
-│   │   ├── controllers/     # Request handlers
-│   │   ├── routes/          # API routes
-│   │   ├── services/        # Business logic
-│   │   ├── repositories/    # Database operations
-│   │   ├── middleware/      # Auth, validation, error handling
-│   │   ├── validators/      # Zod schemas
-│   │   ├── utils/           # Helpers (db, AppError)
-│   │   ├── scripts/         # Database migration scripts
-│   │   └── index.ts         # Server entry point
-│   ├── package.json
-│   └── tsconfig.json
+│ ├── src/
+│ │ ├── controllers/ # Request handlers
+│ │ ├── routes/ # API routes
+│ │ ├── services/ # Business logic
+│ │ ├── repositories/ # Database operations
+│ │ ├── middleware/ # Auth, validation, error handling
+│ │ ├── validators/ # Zod schemas
+│ │ ├── utils/ # Helpers (db, AppError)
+│ │ ├── scripts/ # Database migration scripts
+│ │ └── index.ts # Server entry point
+│ ├── package.json
+│ └── tsconfig.json
 ├── frontend/
-│   ├── src/
-│   │   ├── components/      # React components
-│   │   ├── pages/           # Page components
-│   │   ├── services/        # API service calls
-│   │   ├── contexts/        # React context (auth)
-│   │   ├── types/           # TypeScript interfaces
-│   │   └── App.tsx          # App entry point
-│   ├── package.json
-│   └── tsconfig.json
+│ ├── src/
+│ │ ├── components/ # React components
+│ │ ├── pages/ # Page components
+│ │ ├── services/ # API service calls
+│ │ ├── contexts/ # React context (auth)
+│ │ ├── types/ # TypeScript interfaces
+│ │ └── App.tsx # App entry point
+│ ├── package.json
+│ └── tsconfig.json
 ├── README.md
 ├── .env.example
 └── docker-compose.yml
-Prerequisites
+
+text
+
+## Prerequisites
+
 Before you begin, ensure you have the following installed:
 
-Node.js (v18 or higher)
+- Node.js (v18 or higher)
+- npm (v9 or higher)
+- Docker Desktop (for containerized setup)
+- Git (for cloning)
 
-npm (v9 or higher)
+## Installation
 
-Docker Desktop (for containerized setup)
-
-Git (for cloning)
-
-Installation
 1. Clone the repository
-   bash
-   git clone https://github.com/xachilleas/film-todos.git
-   cd film-todos
-2. Install backend dependencies
-   bash
-   cd backend
-   npm install
-3. Install frontend dependencies
-   bash
-   cd ../frontend
-   npm install
-   Docker Setup
-   Quick Start with Docker Compose
-   Start all services
+
+```bash
+git clone https://github.com/xachilleas/film-todos.git
+cd film-todos
+Install backend dependencies
+
+bash
+cd backend
+npm install
+Install frontend dependencies
+
+bash
+cd ../frontend
+npm install
+Docker Setup
+Quick Start with Docker Compose
+Start all services:
 
 bash
 docker-compose up -d --build
-Verify containers are running
+Verify containers are running:
 
 bash
 docker ps
@@ -139,7 +131,7 @@ film-todos-backend (port 3000)
 
 film-todos-sqlserver (port 50720)
 
-Access the application
+Access the application:
 
 Frontend: http://localhost:5173
 
@@ -251,11 +243,10 @@ The Docker Compose setup includes SQL Server and automatically creates the datab
 
 Option 2: Using Docker Container Only
 bash
-# Run SQL Server container
 docker run -e "ACCEPT_EULA=Y" \
--e "SA_PASSWORD=YourPassword123!" \
--p 50720:1433 \
--d mcr.microsoft.com/mssql/server:2022-latest
+  -e "SA_PASSWORD=YourPassword123!" \
+  -p 50720:1433 \
+  -d mcr.microsoft.com/mssql/server:2022-latest
 Option 3: Local SQL Server Installation
 Install SQL Server locally, create a database named FilmTodosDB, and run the database setup script:
 
@@ -303,14 +294,14 @@ created_at	DATETIME2	Creation timestamp
 updated_at	DATETIME2	Last update timestamp
 Running the Application
 Without Docker
-Start the Backend Server
+Start the Backend Server:
 
 bash
 cd backend
 npm run dev
 Server runs at: http://localhost:3000
 
-Start the Frontend
+Start the Frontend:
 
 bash
 cd frontend
@@ -349,7 +340,8 @@ filter=seen - Show only seen movies
 filter=unseen - Show only unseen movies
 
 Testing
-Run Backend Tests
+Run Backend Tests:
+
 bash
 cd backend
 npm test
@@ -414,4 +406,3 @@ OMDb API for providing movie data
 Coding Factory 9 for the curriculum
 
 All instructors and mentors
-
