@@ -1,6 +1,45 @@
 # Film-Todos
 
-A full-stack web application where users can search for movies using the OMDb API, and authenticated users can save them to a personal watchlist and manage their movie collection. (WOMM)
+A full-stack web application that allows users to search for movies using the OMDb API without the need to log in. Authenticated users can create and manage a personal watchlist, mark movies as seen or unseen, filter their watchlist by status (All, Seen, Unseen), and browse results with pagination for a seamless experience.
+
+Watch the Demo
+Click the link below to watch the full demonstration:
+
+[Watch Demo Video](./screenshots/demo.mp4)
+
+If the video doesn't play in your browser, right-click and choose "Save link as" to download and watch locally.
+
+### Screenshots
+
+#### Starting Search
+<img src="./screenshots/startingSearch.png" alt="Starting Search" width="600">
+
+#### Login
+<img src="./screenshots/login.png" alt="Login" width="600">
+
+#### Logged in Search
+<img src="./screenshots/loggedInSearch.png" alt="Logged-in search" width="600">
+
+#### Search Results
+<img src="./screenshots/searchResults.png" alt="Search Results" width="600">
+
+#### Movie Card
+<img src="./screenshots/movieCard.png" alt="Movie Card" width="600">
+
+#### Watch List
+<img src="./screenshots/watchList.png" alt="Watch List" width="600">
+
+#### Pagination
+<img src="./screenshots/pagination.png" alt="Pagination" width="600">
+
+#### Movies Seen
+<img src="./screenshots/moviesSeen.png" alt="Movies Seen" width="600">
+
+#### Register form 
+<img src="./screenshots/register.png" alt="Register" width="600">
+
+#### Docker Running
+<img src="./screenshots/dockerRunning.png" alt="Docker Running" width="600">
 
 ## Table of Contents
 
@@ -15,6 +54,7 @@ A full-stack web application where users can search for movies using the OMDb AP
 - [Running the Application](#running-the-application)
 - [API Documentation](#api-documentation)
 - [Testing](#testing)
+- [Postman Testing](#postman-testing)
 - [Assignment Requirements](#assignment-requirements)
 - [Future Improvements](#future-improvements)
 - [License](#license)
@@ -23,6 +63,7 @@ A full-stack web application where users can search for movies using the OMDb AP
 ## Features
 
 - User Authentication - Register and login with JWT-based authentication
+- Protected Routes - All watchlist endpoints require a valid JWT token
 - Movie Search - Search for movies using the OMDb API with pagination
 - Full Movie Data Storage - All OMDb fields (Genre, Director, Actors, Runtime, imdbRating, Plot) are stored locally when adding to watchlist
 - Watchlist Management - Add/remove movies to/from your personal watchlist
@@ -207,7 +248,7 @@ Environment Variables
 Backend Configuration
 Create a .env file in the backend/ directory:
 
-env
+text
 # Backend .env
 PORT=3000
 JWT_SECRET=your-super-secret-jwt-key
@@ -221,17 +262,17 @@ DB_PASSWORD=your_db_password
 
 # OMDb API
 OMDB_API_KEY=your_omdb_api_key
-Note: Get your OMDb API key from OMDb API
+Note: Get your OMDb API key from OMDb API (http://www.omdbapi.com/apikey.aspx)
 
 Frontend Configuration
 Create a .env file in the frontend/ directory:
 
-env
+text
 VITE_API_URL=http://localhost:3000
 Docker Environment
 When using Docker Compose, the backend uses these environment variables (configured in docker-compose.yml):
 
-env
+text
 DB_HOST=film-todos-sqlserver
 DB_USER=sa
 DB_PASSWORD=AChi1978
@@ -264,7 +305,6 @@ node src/scripts/add-movie-columns.js
 node src/scripts/add-seen-column.js
 Database Schema
 Users Table
-
 Column	Type	Description
 id	INT	Primary Key
 username	NVARCHAR(255)	Unique username
@@ -274,7 +314,6 @@ full_name	NVARCHAR(255)	User's full name
 created_at	DATETIME2	Creation timestamp
 updated_at	DATETIME2	Last update timestamp
 WatchlistItems Table
-
 Column	Type	Description
 id	INT	Primary Key
 user_id	INT	Foreign Key to Users
@@ -361,7 +400,42 @@ WatchlistService: 6 tests
 
 WatchlistRepository: 9 tests
 
-Assignment Requirements Checklist
+Postman Testing
+The REST API has been thoroughly tested using Postman. A Postman collection is available for testing all endpoints.
+
+Available Tests
+Category	Tests Performed
+Authentication	Register, Login, Token validation
+Movies	Search movies, Get movie details
+Watchlist	Add, Remove, Toggle seen/unseen, List with filters
+Authorization	Protected endpoints (require valid JWT token)
+Error Handling	Invalid requests, Missing tokens, Non-existent resources
+How to Test with Postman
+Set the base URL: http://localhost:3000
+
+Test the flow:
+
+Register a new user: POST /api/auth/register
+
+Login: POST /api/auth/login (copy the JWT token from the response)
+
+Search movies: GET /api/movies/search?title=Inception
+
+Add to watchlist: POST /api/watchlist (with token in Authorization header as Bearer token)
+
+View watchlist: GET /api/watchlist
+
+Toggle seen/unseen: PATCH /api/watchlist/:imdbId/seen
+
+Remove from watchlist: DELETE /api/watchlist/:imdbId
+
+Postman Environment Variables
+text
+baseUrl: http://localhost:3000
+token: [your JWT token from login]
+All endpoints are documented in Swagger at /api-docs for reference.
+
+Assignment Requirements
 Requirement	Status
 Domain Model (Users + Watchlist)	Done
 Database (SQL Server)	Done
@@ -370,6 +444,7 @@ REST API	Done
 Authentication/Authorization (JWT)	Done
 Frontend (React)	Done
 Unit Tests (Jest - 37+ tests)	Done
+Integration Tests (Postman)	Done
 Swagger Documentation	Done
 Full Movie Data Storage (Extension 1)	Done
 Seen/Unseen Tracking (Extension 2)	Done
@@ -398,10 +473,10 @@ This project is created as a final assignment for the Coding Factory 9 program a
 Author
 Achilleas
 
-GitHub: @xachilleas
+GitHub: https://github.com/xachilleas
 
 Acknowledgements
-OMDb API for providing movie data
+OMDb API for providing movie data (http://www.omdbapi.com/)
 
 Coding Factory 9 for the curriculum
 
