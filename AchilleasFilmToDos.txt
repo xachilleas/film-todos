@@ -1,0 +1,23 @@
+https://github.com/xachilleas/film-todos
+
+=========================================
+FILM-TODOS APP - FINAL SUBMISSION
+=========================================
+
+Student Name: Achilleas Xynopoulos
+Course: Coding Factory 9
+Date: 2026-08-28
+
+=========================================
+DECLARATION
+=========================================
+
+I declare that this project is my own original work and all sources
+have been appropriately referenced.
+
+Signature: Achilleas Xynopoulos
+Date: 2026-08-28
+
+=========================================
+END OF SUBMISSION
+=========================================
