@@ -35,7 +35,7 @@ If the video doesn't play in your browser, right-click and choose "Save link as"
 #### Movies Seen
 <img src="./screenshots/moviesSeen.png" alt="Movies Seen" width="600">
 
-#### Register form 
+#### Register form
 <img src="./screenshots/register.png" alt="Register" width="600">
 
 #### Docker Running
@@ -142,7 +142,7 @@ Before you begin, ensure you have the following installed:
 1. Clone the repository
 
    ```bash
-   git clone https://github.com/xachilleas/film-todos.git
+   git clone https://github.com/yourusername/film-todos.git
    cd film-todos
 Install backend dependencies
 
@@ -201,27 +201,23 @@ docker ps
 Database Management with Docker
 Connect to SQL Server using DBeaver or any SQL client:
 
+text
 Host: localhost
-
 Port: 50720
-
 Username: sa
-
-Password: AChi1978
-
+Password: [your database password from .env]
 Database: FilmTodosDB
-
 View tables from command line:
 
 bash
-# View all tables
-docker exec -it film-todos-sqlserver /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P AChi1978 -d FilmTodosDB -C -Q "SELECT name FROM sys.tables"
+# Replace YOUR_PASSWORD with the password from your .env file
+docker exec -it film-todos-sqlserver /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P YOUR_PASSWORD -d FilmTodosDB -C -Q "SELECT name FROM sys.tables"
 
 # View Users table
-docker exec -it film-todos-sqlserver /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P AChi1978 -d FilmTodosDB -C -Q "SELECT * FROM Users"
+docker exec -it film-todos-sqlserver /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P YOUR_PASSWORD -d FilmTodosDB -C -Q "SELECT * FROM Users"
 
 # View WatchlistItems table
-docker exec -it film-todos-sqlserver /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P AChi1978 -d FilmTodosDB -C -Q "SELECT * FROM WatchlistItems"
+docker exec -it film-todos-sqlserver /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P YOUR_PASSWORD -d FilmTodosDB -C -Q "SELECT * FROM WatchlistItems"
 Troubleshooting Docker Issues
 Issue: "Invalid object name 'Users'"
 
@@ -232,7 +228,7 @@ Issue: "Invalid column name 'username'"
 Solution: Missing columns in the Users table. Add the missing column:
 
 bash
-docker exec -it film-todos-sqlserver /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P AChi1978 -d FilmTodosDB -C -Q "ALTER TABLE Users ADD username NVARCHAR(255)"
+docker exec -it film-todos-sqlserver /opt/mssql-tools18/bin/sqlcmd -S localhost -U sa -P YOUR_PASSWORD -d FilmTodosDB -C -Q "ALTER TABLE Users ADD username NVARCHAR(255)"
 Issue: Frontend not serving
 
 Solution: Rebuild the containers:
@@ -248,34 +244,43 @@ Environment Variables
 Backend Configuration
 Create a .env file in the backend/ directory:
 
-text
+bash
 # Backend .env
 PORT=3000
-JWT_SECRET=your-super-secret-jwt-key
+JWT_SECRET=your-super-secret-jwt-key-change-this
 
 # Database
 DB_HOST=localhost
 DB_PORT=50720
 APP_DATABASE=FilmTodosDB
-DB_USER=your_db_user
-DB_PASSWORD=your_db_password
+DB_USER=sa
+DB_PASSWORD=your_secure_password_here
 
 # OMDb API
-OMDB_API_KEY=your_omdb_api_key
-Note: Get your OMDb API key from OMDb API (http://www.omdbapi.com/apikey.aspx)
+OMDB_API_KEY=your_omdb_api_key_here
+Important:
+
+Never commit .env files to version control
+
+Change JWT_SECRET to a strong, unique key
+
+Set a secure password for your database
+
+Get your OMDb API key from OMDb API
 
 Frontend Configuration
 Create a .env file in the frontend/ directory:
 
-text
+bash
 VITE_API_URL=http://localhost:3000
 Docker Environment
-When using Docker Compose, the backend uses these environment variables (configured in docker-compose.yml):
+When using Docker Compose, the backend uses these environment variables (configured in docker-compose.yml). Update the .env file in the project root:
 
-text
+bash
+# Docker .env
 DB_HOST=film-todos-sqlserver
 DB_USER=sa
-DB_PASSWORD=AChi1978
+DB_PASSWORD=your_secure_password_here
 DB_DATABASE=FilmTodosDB
 DB_PORT=1433
 Database Setup
@@ -285,7 +290,7 @@ The Docker Compose setup includes SQL Server and automatically creates the datab
 Option 2: Using Docker Container Only
 bash
 docker run -e "ACCEPT_EULA=Y" \
--e "SA_PASSWORD=YourPassword123!" \
+-e "SA_PASSWORD=YourSecurePassword123!" \
 -p 50720:1433 \
 -d mcr.microsoft.com/mssql/server:2022-latest
 Option 3: Local SQL Server Installation
@@ -305,6 +310,7 @@ node src/scripts/add-movie-columns.js
 node src/scripts/add-seen-column.js
 Database Schema
 Users Table
+
 Column	Type	Description
 id	INT	Primary Key
 username	NVARCHAR(255)	Unique username
@@ -314,6 +320,7 @@ full_name	NVARCHAR(255)	User's full name
 created_at	DATETIME2	Creation timestamp
 updated_at	DATETIME2	Last update timestamp
 WatchlistItems Table
+
 Column	Type	Description
 id	INT	Primary Key
 user_id	INT	Foreign Key to Users
